@@ -1,16 +1,6 @@
 // sniffer.c
+#include "common.h"
 #include "sniffer.h"
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <netinet/if_ether.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
-
-#include <linux/if_packet.h> 
 
 int CreateRawSocket(int protocol_to_sniff) {
     int sockfd;

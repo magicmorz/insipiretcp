@@ -1,16 +1,6 @@
 // main.c
-#define _GNU_SOURCE
+#include "common.h"
 #include "sniffer.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <netinet/if_ether.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
 
 int main(int argc, char *argv[]) {
     // -----------start of sudo debug enabling
