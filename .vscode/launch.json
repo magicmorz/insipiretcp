@@ -22,7 +22,7 @@
             "externalConsole": true,
             "MIMode": "gdb",
             "miDebuggerPath": "${workspaceFolder}/gdb_root.sh",
-            "preLaunchTask": "build",
+            "preLaunchTask": "Build Sniffer",
             "postDebugTask": "clean"
         },
     ]
