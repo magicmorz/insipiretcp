@@ -87,7 +87,7 @@ void PrintPacketInHex(unsigned char *packet, int length)
 int main(int argc, char *argv[])
 {
 
-    // --------start of sudo debug enabling
+    // ----------start of sudo debug enabling
     /*
     The sole purprose of this code is to enable debugging with sudo in vscode.
     In order to make it work, make the following steps:
