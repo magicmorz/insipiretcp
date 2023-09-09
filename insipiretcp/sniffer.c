@@ -17,8 +17,8 @@ int CreateRawSocket(int protocol_to_sniff) {
 }
 
 void BindRawSocketToInterface(int sockfd, char *interface_name) {
-    struct sockaddr_ll sll;
-    struct ifreq ifr;
+    struct sockaddr_ll sll; // "ll" stands for "link layer" (aka "layer 2" or "data link layer")
+    struct ifreq ifr; // interface requst
 
     memset(&sll, 0, sizeof(struct sockaddr_ll));
     memset(&ifr, 0, sizeof(struct ifreq));
