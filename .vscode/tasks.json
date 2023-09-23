@@ -7,7 +7,8 @@
           "command": "gcc",
           "args": [
               "-g",
-              "${workspaceFolder}/insipiretcp/sniffer.c",
+              "${workspaceFolder}/insipiretcp/socket_utils.c",
+              "${workspaceFolder}/insipiretcp/debug_utils.c",
               "${workspaceFolder}/insipiretcp/main.c",
               "-o",
               "${workspaceFolder}/insipiretcp/${fileBasenameNoExtension}"
