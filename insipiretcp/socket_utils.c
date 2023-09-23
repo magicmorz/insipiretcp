@@ -1,6 +1,6 @@
-// sniffer.c
+// socket_utils.c
 #include "common.h"
-#include "sniffer.h"
+#include "socket_utils.h"
 
 int CreateRawSocket(int protocol_to_sniff) {
     int sockfd;
@@ -17,8 +17,8 @@ int CreateRawSocket(int protocol_to_sniff) {
 }
 
 void BindRawSocketToInterface(int sockfd, char *interface_name) {
-    struct sockaddr_ll sll; // "ll" stands for "link layer" (aka "layer 2" or "data link layer")
-    struct ifreq ifr; // interface requst
+    struct sockaddr_ll sll;
+    struct ifreq ifr;
 
     memset(&sll, 0, sizeof(struct sockaddr_ll));
     memset(&ifr, 0, sizeof(struct ifreq));

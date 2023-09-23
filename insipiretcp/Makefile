@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 # Source files
-SRC = sniffer.c main.c
+SRC = socket_utils.c main.c
 
 # Object files
 OBJ = $(SRC:.c=.o)

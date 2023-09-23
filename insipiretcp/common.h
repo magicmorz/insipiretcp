@@ -14,7 +14,6 @@
 #include <sys/ioctl.h>
 #include <linux/if_packet.h> 
 
-
 #define _GNU_SOURCE // Define this if needed globally
 
 // You can add other common #define macros here

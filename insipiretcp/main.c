@@ -1,6 +1,6 @@
 // main.c
 #include "common.h"
-#include "sniffer.h"
+#include "socket_utils.h"
 
 int main(int argc, char *argv[]) {
     // -----------start of sudo debug enabling
@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Get interface name and number of packets from user command line input
     interface_name = argv[1];
     num_packets = atoi(argv[2]);
 
