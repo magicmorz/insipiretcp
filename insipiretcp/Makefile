@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 # Source files
-SRC = debug_utils.c socket_utils.c main.c
+SRC = general_utils.c protocol_support.c debug_utils.c socket_utils.c main.c
 
 # Object files
 OBJ = $(SRC:.c=.o)

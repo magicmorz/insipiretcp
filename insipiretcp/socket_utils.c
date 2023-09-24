@@ -1,6 +1,7 @@
 // socket_utils.c
 #include "common.h"
 #include "socket_utils.h"
+#include "protocol_support.h"
 #define ERROR -1
 int CreateRawSocket(int protocol_to_sniff) {
     int sock_desc;
@@ -77,5 +78,7 @@ void SniffPackets(int sockfd, int num_packets)
 
         // Print the packet in hexadecimal form
         PrintPacketInHex(packet, packet_length);
+
+        ParseEthernet(packet, packet_length);
     }
 }
