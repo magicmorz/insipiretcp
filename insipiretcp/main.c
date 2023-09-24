@@ -17,20 +17,20 @@ int main(int argc, char *argv[]) {
 
 
     // Create a raw socket that will capture all Ethernet protocols
-    int sockfd = CreateRawSocket(ETH_P_ALL);
+    int raw_socket_descriptor = CreateRawSocket(ETH_P_ALL);
 
     // Get interface name and number of packets from user command line input
     interface_name = argv[1];
     // Bind the raw socket to the specified network interface
-    BindRawSocketToInterface(sockfd, interface_name);
+    BindRawSocketToInterface(raw_socket_descriptor, interface_name);
 
     num_packets = atoi(argv[2]);
     printf("Sniffing %d packets on interface %s...\n", num_packets, interface_name);
 
-    SniffPackets(sockfd, num_packets, interface_name);
+    SniffPackets(raw_socket_descriptor, num_packets);
 
     // Close the socket
-    close(sockfd);
+    close(raw_socket_descriptor);
 
     return EXIT_SUCCESS;
 }

@@ -56,7 +56,7 @@ void PrintPacketInHex(unsigned char *packet, int length) {
     printf("\n");
 }
 
-void SniffPackets(int sockfd, int num_packets, char* interface_name)
+void SniffPackets(int sockfd, int num_packets)
 {
     for (int i = 0; i < num_packets; i++) {
         unsigned char packet[2048]; // Adjust the size as needed
