@@ -3,45 +3,45 @@
 #include "socket_utils.h"
 #define ERROR -1
 int CreateRawSocket(int protocol_to_sniff) {
-    int sockfd;
+    int sock_desc;
 
     // Create a raw socket with the specified protocol
     // Domain = AF_PACKET (IPv4 communication)
     // type = SOCK_RAW 
     // protocol = provided argument (int protocol_to_sniff)
-    sockfd = socket(AF_PACKET, SOCK_RAW, htons(protocol_to_sniff)); 
+    sock_desc = socket(AF_PACKET, SOCK_RAW, htons(protocol_to_sniff)); 
 
-    if (sockfd == ERROR) {
+    if (sock_desc == ERROR) {
         perror("Socket creation error");
         exit(EXIT_FAILURE);
     }
 
-    return sockfd;
+    return sock_desc;
 }
 
-void BindRawSocketToInterface(int sockfd, char *interface_name) {
-    struct sockaddr_ll sll;
+void BindRawSocketToInterface(int sock_desc, char *interface_name) {
+    struct sockaddr_ll packet_info;
     struct ifreq ifr;
 
-    memset(&sll, 0, sizeof(struct sockaddr_ll));
+    memset(&packet_info, 0, sizeof(struct sockaddr_ll));
     memset(&ifr, 0, sizeof(struct ifreq));
 
     // Get the index of the interface
     strncpy(ifr.ifr_name, interface_name, IFNAMSIZ - 1);
-    if (ioctl(sockfd, SIOCGIFINDEX, &ifr) == -1) {
+    if (ioctl(sock_desc, SIOCGIFINDEX, &ifr) == -1) {
         perror("SIOCGIFINDEX");
-        close(sockfd);
+        close(sock_desc);
         exit(EXIT_FAILURE);
     }
 
-    sll.sll_family = AF_PACKET;
-    sll.sll_protocol = htons(ETH_P_ALL); // Capture all Ethernet protocols, endieness (host to network, short)
-    sll.sll_ifindex = ifr.ifr_ifindex;
+    packet_info.sll_family = AF_PACKET;
+    packet_info.sll_protocol = htons(ETH_P_ALL); // Capture all Ethernet protocols, endieness (host to network byte order, short)
+    packet_info.sll_ifindex = ifr.ifr_ifindex;
 
     // Bind the socket to the specified network interface
-    if (bind(sockfd, (struct sockaddr *)&sll, sizeof(struct sockaddr_ll)) == ERROR) {
+    if (bind(sock_desc, (struct sockaddr *)&packet_info, sizeof(struct sockaddr_ll)) == ERROR) {
         perror("Bind error");
-        close(sockfd);
+        close(sock_desc);
         exit(EXIT_FAILURE);
     }
 }

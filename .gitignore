@@ -1,3 +1,4 @@
 sniffer
 *.o
 settings.json
+cscope.out
