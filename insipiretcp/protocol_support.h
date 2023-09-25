@@ -3,5 +3,6 @@
 #define PROTOCOL_SUPPORT_H
 
 void ParseEthernet(unsigned char *packet, int len);
+void ParseIP(unsigned char *packet, int len);
 
 #endif /* PROTOCOL_SUPPORT_H */

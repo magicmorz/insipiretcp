@@ -80,5 +80,7 @@ void SniffPackets(int sockfd, int num_packets)
         PrintPacketInHex(packet, packet_length);
 
         ParseEthernet(packet, packet_length);
+
+        ParseIP(packet, packet_length);
     }
 }

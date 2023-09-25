@@ -13,6 +13,7 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <linux/if_packet.h> 
+#include <linux/ip.h>
 
 #define _GNU_SOURCE // Define this if needed globally
 

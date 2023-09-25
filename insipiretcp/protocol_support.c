@@ -21,3 +21,41 @@ void ParseEthernet(unsigned char *packet, int len)
     
 
 }
+
+void ParseIP(unsigned char *packet, int len)
+{
+    struct ethhdr* ethernet_header;
+    struct iphdr* ip_header;
+    
+    /* First check if the packet contains an IP header using the Ethernet header */
+
+    ethernet_header = (struct ethhdr *)packet;
+    if (ntohs(ethernet_header->h_proto)== ETH_P_IP)
+    {
+        /* The IP header is after the Ethernet header */
+        if (len >= (sizeof(struct ethhdr)+ sizeof(struct iphdr)))
+        {
+            ip_header = (struct iphdr*)(packet + sizeof(struct ethhdr));
+
+            /* Convert IP addresses from network byte order to host byte order */
+            struct in_addr src_addr, dest_addr;
+            src_addr.s_addr = ip_header->saddr;
+            dest_addr.s_addr = ip_header->daddr;
+
+            /* Print the source and destination IP address */
+            printf("Destination IP address: %s\n", inet_ntoa(dest_addr));
+            printf("Source IP address: %s\n", inet_ntoa(src_addr));
+        }
+        else
+        {
+            perror("IP packet does not have full header");
+        }
+        
+    }
+    else
+    {
+        /* Not an IP packet */
+    }
+    
+    
+}
