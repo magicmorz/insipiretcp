@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
     num_packets = atoi(argv[2]);
     printf("Sniffing %d packets on interface %s...\n", num_packets, interface_name);
-
+    
     SniffPackets(raw_socket_descriptor, num_packets);
 
     // Close the socket

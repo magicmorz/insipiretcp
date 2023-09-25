@@ -2,6 +2,6 @@
 #ifndef GENERAL_UTILS_H
 #define GENERAL_UTILS_H
 
-void PrintInHex(char *msg, unsigned char *p, int len);
+void PrintInHex(const char *msg, const unsigned char *p, int len);
 
 #endif /* GENERAL_UTILS_H */

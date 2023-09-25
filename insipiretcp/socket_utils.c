@@ -60,7 +60,7 @@ void PrintPacketInHex(unsigned char *packet, int length) {
     printf("\n");
 }
 
-void SniffPackets(int sockfd, int num_packets)
+int SniffPackets(int sockfd, int num_packets)
 {
     for (int i = 0; i < num_packets; i++) {
         unsigned char packet[2048]; // Adjust the size as needed
@@ -82,5 +82,7 @@ void SniffPackets(int sockfd, int num_packets)
         ParseEthernet(packet, packet_length);
 
         ParseIP(packet, packet_length);
+
     }
+    return EXIT_SUCCESS;
 }

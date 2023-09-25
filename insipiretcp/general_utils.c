@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-void PrintInHex(char *msg, unsigned char *p, int len)
+void PrintInHex(const char *msg, const unsigned char *p, int len)
 {
-    printf(msg);
+    printf("%s", msg);
     while (len--)
     {
         printf("%.2X ", *p);

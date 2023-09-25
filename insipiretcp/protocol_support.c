@@ -1,12 +1,12 @@
 #include "common.h"
 #include "general_utils.h"
-void ParseEthernet(unsigned char *packet, int len)
+void ParseEthernet(unsigned char *packet, size_t len)
 {
 
     struct ethhdr* ethernet_header;
     if (len>sizeof(ethernet_header))
     {
-        ethernet_header = (struct ethhder*)packet;
+        ethernet_header = (struct ethhdr*)packet;
         PrintInHex("Destination MAC: ", ethernet_header->h_dest, 6);
         printf("\n");
         PrintInHex("Source MAC: ", ethernet_header->h_source, 6);
@@ -22,7 +22,7 @@ void ParseEthernet(unsigned char *packet, int len)
 
 }
 
-void ParseIP(unsigned char *packet, int len)
+void ParseIP(unsigned char *packet, size_t len)
 {
     struct ethhdr* ethernet_header;
     struct iphdr* ip_header;
