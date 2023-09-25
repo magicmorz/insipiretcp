@@ -45,6 +45,13 @@ void ParseIP(unsigned char *packet, size_t len)
             /* Print the source and destination IP address */
             printf("Destination IP address: %s\n", inet_ntoa(dest_addr));
             printf("Source IP address: %s\n", inet_ntoa(src_addr));
+            printf("tos: %u\n", ip_header->tos);
+            printf("total length: %hu\n", ntohs(ip_header->tot_len));
+            printf("id: %hu\n", ntohs(ip_header->id));
+            printf("fragment offset: %hu\n", ntohs(ip_header->frag_off));
+            printf("ttl: %u\n", ip_header->ttl);
+            printf("protocol is: %u\n", ip_header->protocol);   
+            printf("checksum is: %04x\n", ip_header->check);
         }
         else
         {

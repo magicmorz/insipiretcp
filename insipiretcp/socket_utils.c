@@ -2,6 +2,7 @@
 #include "common.h"
 #include "socket_utils.h"
 #include "protocol_support.h"
+#include "general_utils.h"
 #define ERROR -1
 int CreateRawSocket(int protocol_to_sniff) {
     int sock_desc;
@@ -62,9 +63,15 @@ void PrintPacketInHex(unsigned char *packet, int length) {
 
 int SniffPackets(int sockfd, int num_packets)
 {
+    char timestamp[30]; // Adjust the size as needed
+    
     for (int i = 0; i < num_packets; i++) {
         unsigned char packet[2048]; // Adjust the size as needed
         int packet_length;
+
+        GetTimeStamp(timestamp, sizeof(timestamp));
+        printf("Timestamp: %s\n", timestamp);
+
 
         // Receive a packet
         packet_length = recvfrom(sockfd, packet, sizeof(packet), 0, NULL, NULL);
@@ -82,6 +89,8 @@ int SniffPackets(int sockfd, int num_packets)
         ParseEthernet(packet, packet_length);
 
         ParseIP(packet, packet_length);
+
+        printf("\n\n");
 
     }
     return EXIT_SUCCESS;
