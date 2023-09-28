@@ -69,6 +69,33 @@ void PrintPacketInHex(unsigned char *packet, int length)
     printf("\n");
 }
 
+int IsIpAndTcpPacket(unsigned char *packet)
+{
+    struct ethhdr *ethernet_header;
+    struct iphdr *ip_header;
+
+    /* First check if the packet contains an IP header using the Ethernet header */
+
+    ethernet_header = (struct ethhdr *)packet;
+    if (ntohs(ethernet_header->h_proto) == ETH_P_IP)
+    {
+        ip_header = (struct iphdr *)(packet + sizeof(struct ethhdr));
+
+        if (ip_header->protocol == IPPROTO_TCP)
+        {
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return -1;
+    }
+}
+
 int SniffPackets(int sockfd, int num_packets)
 {
     char timestamp[30]; // Adjust the size as needed
@@ -82,6 +109,8 @@ int SniffPackets(int sockfd, int num_packets)
         printf("Timestamp: %s\n", timestamp);
 
         // Receive a packet
+        // printf("Press Enter to continue...");
+        // getchar(); // Wait for user to press Enter
         packet_length = recvfrom(sockfd, packet, sizeof(packet), 0, NULL, NULL);
         if (packet_length == -1)
         {
@@ -97,9 +126,28 @@ int SniffPackets(int sockfd, int num_packets)
 
         ParseEthernet(packet, packet_length);
 
-        ParseIP(packet, packet_length);
-
-        ParseTCP(packet, packet_length);
+        if (ParseIP(packet, packet_length) == 1)
+        {
+            if (ParseTCP(packet, packet_length) == 1)
+            {
+                if (!ParseData(packet, packet_length))
+                {
+                    num_packets++;
+                    printf("------------ END OF PACKET, NO DATA ------------\n");
+                }
+                printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
+            }
+            else
+            {
+                num_packets++;
+                printf("------------ END OF PACKET, NOT TCP ------------\n");
+            }
+        }
+        else
+        {
+            num_packets++;
+            printf("------------ END OF PACKET, NOT IP ------------\n");
+        }
 
         printf("\n\n");
     }

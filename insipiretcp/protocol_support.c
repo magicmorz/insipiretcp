@@ -1,5 +1,6 @@
 #include "common.h"
 #include "general_utils.h"
+#include "socket_utils.h"
 void ParseEthernet(unsigned char *packet, size_t len)
 {
 
@@ -20,7 +21,7 @@ void ParseEthernet(unsigned char *packet, size_t len)
     }
 }
 
-void ParseIP(unsigned char *packet, size_t len)
+int ParseIP(unsigned char *packet, size_t len)
 {
     struct ethhdr *ethernet_header;
     struct iphdr *ip_header;
@@ -50,19 +51,22 @@ void ParseIP(unsigned char *packet, size_t len)
             printf("ttl: %u\n", ip_header->ttl);
             printf("protocol is: %u\n", ip_header->protocol);
             printf("checksum is: %04x\n", ip_header->check);
+            return 1;
         }
         else
         {
             perror("IP packet does not have full header");
+            return -1;
         }
     }
     else
     {
         /* Not an IP packet */
+        return -1;
     }
 }
 
-void ParseTCP(unsigned char *packet, size_t len)
+int ParseTCP(unsigned char *packet, size_t len)
 {
     struct ethhdr *ethernet_header;
     struct iphdr *ip_header;
@@ -85,15 +89,54 @@ void ParseTCP(unsigned char *packet, size_t len)
                 /* Print the Dest and Src ports */
                 printf("Source Port: %d\n", ntohs(tcp_header->source));
                 printf("Dest Port: %d\n", ntohs(tcp_header->dest));
+                return 1;
             }
             else
             {
-                printf("Not a TCP packet");
+                printf("Not a TCP packet\n");
+                return -1;
             }
         }
         else
         {
             printf("Not an IP packet\n");
+            return -1;
         }
+    }
+    return -1;
+}
+
+int ParseData(unsigned char *packet, size_t len)
+{
+    struct iphdr *ip_header;
+    unsigned char *data;
+    int data_len;
+
+    /* Check if any data is there */
+    if (len > (sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct tcphdr)))
+    {
+        ip_header = (struct iphdr *)(packet + sizeof(struct ethhdr));
+
+        data = (packet + sizeof(struct ethhdr) + ip_header->ihl * 4 + sizeof(struct tcphdr));
+
+        data_len = ntohs(ip_header->tot_len) - ip_header->ihl * 4 - sizeof(struct tcphdr);
+        if (data_len)
+        {
+            printf("Data Length : %d\n", data_len);
+            printf("Data : \n");
+            PrintPacketInHex(data, data_len);
+            printf("\n\n");
+            return 1;
+        }
+        else
+        {
+            printf("No Data in packet\n");
+            return 0;
+        }
+    }
+    else
+    {
+        printf("No Data in packet\n");
+        return 0;
     }
 }
