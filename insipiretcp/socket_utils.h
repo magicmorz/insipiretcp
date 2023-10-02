@@ -10,5 +10,6 @@ void PrintPacketInHex(unsigned char *packet, int length);
 int SniffPackets(int sockfd, int num_packets);
 int IsIpAndTcpPacket(unsigned char *packet);
 int ParseData(unsigned char *packet, size_t len);
+int isInterfaceValid(const char *interfaceName);
 
 #endif /* SOCKET_UTILS_H */

@@ -1,29 +1,42 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${fileDirname}/${fileBasenameNoExtension}",
+      "args": [
+        "enp0s3",
+        "1"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/gdb_root.sh",
+      "preLaunchTask": "Build Sniffer",
+      "postDebugTask": "clean"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "cwd": "/home/mish/insipiretcp/insipiretcp",
+      "program": "/home/mish/insipiretcp/insipiretcp/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
         {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            //"program": "${fileDirname}/${fileBasenameNoExtension}.exe",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": [
-                "enp0s3",
-                "1"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [
-                /*{
-                    "name": "LD_PRELOAD",
-                    "value": "${workspaceFolder}/so_proxy/clienthack.so"
-                }*/
-            ],
-            "externalConsole": true,
-            "MIMode": "gdb",
-            "miDebuggerPath": "${workspaceFolder}/gdb_root.sh",
-            "preLaunchTask": "Build Sniffer",
-            "postDebugTask": "clean"
-        },
-    ]
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
 }

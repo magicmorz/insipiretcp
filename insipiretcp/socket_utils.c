@@ -153,3 +153,14 @@ int SniffPackets(int sockfd, int num_packets)
     }
     return EXIT_SUCCESS;
 }
+
+int isInterfaceValid(const char *interfaceName) {
+    // Use if_nametoindex to check if the interface name is valid
+    unsigned int index = if_nametoindex(interfaceName);
+
+    if (index != 0) {
+        return 1; // Interface is valid
+    } else {
+        return 0; // Interface is not valid or does not exist
+    }
+}

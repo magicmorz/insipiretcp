@@ -14,13 +14,18 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <interface> <num_packets>\n", argv[0]);
         return EXIT_FAILURE;
     }
-
+    // Get interface name and number of packets from user command line input
+    interface_name = argv[1];
+    if (isInterfaceValid(interface_name)) {
+        printf("Interface %s is valid.\n", interface_name);
+    } else {
+        printf("Interface %s is not valid or does not exist.\n", interface_name);
+    }
 
     // Create a raw socket that will capture all Ethernet protocols
     int raw_socket_descriptor = CreateRawSocket(ETH_P_ALL);
 
-    // Get interface name and number of packets from user command line input
-    interface_name = argv[1];
+    
     // Bind the raw socket to the specified network interface
     BindRawSocketToInterface(raw_socket_descriptor, interface_name);
 
