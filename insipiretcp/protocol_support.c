@@ -66,6 +66,57 @@ int ParseIP(unsigned char *packet, size_t len)
     }
 }
 
+int ParseIPv6(unsigned char *packet, size_t len)
+{
+    // IPv6 Header Structure
+    struct ipv6hdr
+    {
+        // 4-bit Version, 8-bit Traffic Class, 20-bit Flow Label
+        uint32_t version_tc_fl;     // Version, Traffic Class, Flow Label
+        uint16_t payload_length;    // 16-bit Payload Length
+        uint8_t next_header;        // 8-bit Next Header (Protocol)
+        uint8_t hop_limit;          // 8-bit Hop Limit
+        uint8_t source_ip[16];      // 128-bit Source IPv6 Address
+        uint8_t destination_ip[16]; // 128-bit Destination IPv6 Address
+    };
+
+      if (len >= sizeof(struct ipv6hdr)) {
+        // Create a pointer to the IPv6 header structure
+        const struct ipv6hdr *ipv6_header = (struct ipv6hdr *)(packet + sizeof(struct ethhdr));
+
+        // Extract fields from the IPv6 header structure
+        uint8_t version = (ipv6_header->version_tc_fl >> 28) & 0x0F;
+        uint8_t traffic_class = (ipv6_header->version_tc_fl >> 20) & 0xFF;
+        uint32_t flow_label = ipv6_header->version_tc_fl & 0xFFFFF;
+        uint16_t payload_length = ntohs(ipv6_header->payload_length);
+        uint8_t next_header = ipv6_header->next_header;
+        uint8_t hop_limit = ipv6_header->hop_limit;
+
+        char source_ip_str[INET6_ADDRSTRLEN];
+        char dest_ip_str[INET6_ADDRSTRLEN];
+
+        // Convert source and destination IPv6 addresses to strings
+        inet_ntop(AF_INET6, ipv6_header->source_ip, source_ip_str, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, ipv6_header->destination_ip, dest_ip_str, INET6_ADDRSTRLEN);
+
+        // Print IPv6 header information
+        printf("---- IPv6 Header ----\n");
+        printf("Version: %u\n", version);
+        printf("Traffic Class: %u\n", traffic_class);
+        printf("Flow Label: %u\n", flow_label);
+        printf("Payload Length: %u\n", payload_length);
+        printf("Next Header (Protocol): %u\n", next_header);
+        printf("Hop Limit: %u\n", hop_limit);
+        printf("Source IP: %s\n", source_ip_str);
+        printf("Destination IP: %s\n", dest_ip_str);
+
+        return 1;
+    } else {
+        perror("IPv6 packet is too short");
+        return -1;
+    }
+}
+
 int ParseARP(unsigned char *packet, size_t len)
 {
 

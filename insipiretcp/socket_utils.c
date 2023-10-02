@@ -155,6 +155,36 @@ int SniffPackets(int sockfd, int num_packets)
                 printf("------------ END OF PACKET, NOT TCP, NOT UDP ------------\n");
             }
         }
+        else if (ParseIPv6(packet, packet_length) == 1)
+        {
+            if (ParseTCP(packet, packet_length) == 1)
+            {
+                if (!ParseData(packet, packet_length))
+                {
+                    num_packets++;
+                    printf("------------ END OF PACKET, IPv6 & TCP & NO DATA ------------\n");
+                }
+                else
+                {
+                    printf("------------ END OF PACKET, IPv6 & TCP & DATA ------------\n");
+                }
+            }
+            else if (ParseUDP(packet, packet_length) == 1)
+            {
+                if (!ParseData(packet, packet_length))
+                {
+                    num_packets++;
+                    printf("------------ END OF PACKET, IPv6 & UDP & NO DATA ------------\n");
+                }
+                printf("------------ END OF PACKET, IPv6 & UDP & DATA ------------\n");
+            }
+            else
+            {
+                num_packets++;
+                printf("------------ END OF PACKET, IPv6, NOT TCP, NOT UDP ------------\n");
+            }
+        }
+        
         else if (ParseARP(packet, packet_length) == 1)
         {
             printf("------------ END OF PACKET, ARP ------------\n");
