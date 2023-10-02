@@ -8,6 +8,7 @@ void ParseEthernet(unsigned char *packet, size_t len)
     if (len > sizeof(ethernet_header))
     {
         ethernet_header = (struct ethhdr *)packet;
+        printf("---- Ethernet ----- \n");
         PrintInHex("Destination MAC: ", ethernet_header->h_dest, 6);
         printf("\n");
         PrintInHex("Source MAC: ", ethernet_header->h_source, 6);
@@ -40,8 +41,7 @@ int ParseIP(unsigned char *packet, size_t len)
             struct in_addr src_addr, dest_addr;
             src_addr.s_addr = ip_header->saddr;
             dest_addr.s_addr = ip_header->daddr;
-
-            /* Print the source and destination IP address */
+            printf("---- IPv4 ----- \n");
             printf("Destination IP address: %s\n", inet_ntoa(dest_addr));
             printf("Source IP address: %s\n", inet_ntoa(src_addr));
             printf("tos: %u\n", ip_header->tos);
@@ -85,7 +85,7 @@ int ParseTCP(unsigned char *packet, size_t len)
             if (ip_header->protocol == IPPROTO_TCP)
             {
                 tcp_header = (struct tcphdr *)(packet + sizeof(struct ethhdr) + ip_header->ihl * 4);
-
+                printf("---- TCP ----- \n");
                 /* Print the Dest and Src ports */
                 printf("Source Port: %d\n", ntohs(tcp_header->source));
                 printf("Dest Port: %d\n", ntohs(tcp_header->dest));
@@ -106,6 +106,47 @@ int ParseTCP(unsigned char *packet, size_t len)
     return -1;
 }
 
+int ParseUDP(unsigned char *packet, size_t len)
+{
+    struct ethhdr *ethernet_header;
+    struct iphdr *ip_header;
+    struct udphdr *udp_header;
+
+    /* Check if enough bytes are there for TCP header */
+    if (len >= (sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct tcphdr)))
+    {
+        /* Do all the checks: 1. Is it an IP packet? 2. Is it TCP? */
+        ethernet_header = (struct ethhdr *)packet;
+
+        if (htons(ethernet_header->h_proto) == ETH_P_IP)
+        {
+            ip_header = (struct iphdr *)(packet + sizeof(struct ethhdr));
+
+            if (ip_header->protocol == IPPROTO_UDP)
+            {
+                udp_header = (struct udphdr *)(packet + sizeof(struct ethhdr) + ip_header->ihl * 4);
+                printf("---- UDP ----- \n");
+                /* Print the Dest and Src ports */
+                printf("Source Port: %d\n", ntohs(udp_header->source));
+                printf("Dest Port: %d\n", ntohs(udp_header->dest));
+                return 1;
+            }
+            else
+            {
+                printf("Not a UDP packet\n");
+                return -1;
+            }
+        }
+        else
+        {
+            printf("Not an UDP packet\n");
+            return -1;
+        }
+    }
+    return -1;
+}
+
+
 int ParseData(unsigned char *packet, size_t len)
 {
     struct iphdr *ip_header;
@@ -122,6 +163,7 @@ int ParseData(unsigned char *packet, size_t len)
         data_len = ntohs(ip_header->tot_len) - ip_header->ihl * 4 - sizeof(struct tcphdr);
         if (data_len)
         {
+            printf("---- Data ----- \n");
             printf("Data Length : %d\n", data_len);
             printf("Data : \n");
             PrintPacketInHex(data, data_len);

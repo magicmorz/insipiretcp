@@ -137,10 +137,19 @@ int SniffPackets(int sockfd, int num_packets)
                 }
                 printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
             }
-            else
+            else if (ParseUDP(packet, packet_length) == 1)
+            {
+                if (!ParseData(packet, packet_length))
+                {
+                    num_packets++;
+                    printf("------------ END OF PACKET, NO DATA ------------\n");
+                }
+                printf("------------ END OF PACKET, IP & UDP & DATA ------------\n");
+            }
+            else 
             {
                 num_packets++;
-                printf("------------ END OF PACKET, NOT TCP ------------\n");
+                printf("------------ END OF PACKET, NOT TCP, NOT UDP ------------\n");
             }
         }
         else
