@@ -66,6 +66,73 @@ int ParseIP(unsigned char *packet, size_t len)
     }
 }
 
+int ParseARP(unsigned char *packet, size_t len)
+{
+
+    // Define the ARP structure
+    struct arphdr
+    {
+        __be16 ar_hrd;                  /* format of hardware address   */
+        __be16 ar_pro;                  /* format of protocol address   */
+        unsigned char ar_hln;           /* length of hardware address   */
+        unsigned char ar_pln;           /* length of protocol address   */
+        __be16 ar_op;                   /* ARP opcode (command)         */
+        unsigned char ar_sha[ETH_ALEN]; /* sender hardware address  */
+        unsigned char ar_sip[4];        /* sender IP address          */
+        unsigned char ar_tha[ETH_ALEN]; /* target hardware address  */
+        unsigned char ar_tip[4];        /* target IP address          */
+    };
+
+    struct ethhdr *ethernet_header;
+    ethernet_header = (struct ethhdr *)packet;
+
+    struct arphdr *arp_header;
+
+    /* First check if the packet contains an ARP header using the Ethernet header */
+    if (ntohs(ethernet_header->h_proto) == ETH_P_ARP)
+    {
+        /* The ARP header is after the Ethernet header */
+        if (len >= (sizeof(struct ethhdr) + sizeof(struct arphdr)))
+        {
+            arp_header = (struct arphdr *)(packet + sizeof(struct ethhdr));
+
+            printf("---- ARP ----- \n");
+            printf("format of hardware address: 0x%04x\n", ntohs(arp_header->ar_hrd));
+            printf("format of protocol address: 0x%04x\n", ntohs(arp_header->ar_pro));
+            printf("length of hardware address: %d\n", arp_header->ar_hln);
+            printf("length of protocol address: %d\n", arp_header->ar_pln);
+            printf("ARP opcode (command): 0x%04x\n", ntohs(arp_header->ar_op));
+            printf("Sender MAC address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                   arp_header->ar_sha[0], arp_header->ar_sha[1],
+                   arp_header->ar_sha[2], arp_header->ar_sha[3],
+                   arp_header->ar_sha[4], arp_header->ar_sha[5]);
+            printf("Sender IP address: %d.%d.%d.%d\n",
+                   arp_header->ar_sip[0], arp_header->ar_sip[1],
+                   arp_header->ar_sip[2], arp_header->ar_sip[3]);
+
+            printf("Target MAC address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                   arp_header->ar_tha[0], arp_header->ar_tha[1],
+                   arp_header->ar_tha[2], arp_header->ar_tha[3],
+                   arp_header->ar_tha[4], arp_header->ar_tha[5]);
+            printf("Target IP address: %d.%d.%d.%d\n",
+                   arp_header->ar_tip[0], arp_header->ar_tip[1],
+                   arp_header->ar_tip[2], arp_header->ar_tip[3]);
+
+            return 1;
+        }
+        else
+        {
+            perror("ARP packet does not have full header");
+            return -1;
+        }
+    }
+    else
+    {
+        /* Not an ARP packet */
+        return -1;
+    }
+}
+
 int ParseTCP(unsigned char *packet, size_t len)
 {
     struct ethhdr *ethernet_header;
@@ -145,7 +212,6 @@ int ParseUDP(unsigned char *packet, size_t len)
     }
     return -1;
 }
-
 
 int ParseData(unsigned char *packet, size_t len)
 {

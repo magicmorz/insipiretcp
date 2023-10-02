@@ -133,9 +133,12 @@ int SniffPackets(int sockfd, int num_packets)
                 if (!ParseData(packet, packet_length))
                 {
                     num_packets++;
-                    printf("------------ END OF PACKET, NO DATA ------------\n");
+                    printf("------------ END OF PACKET, IP & TCP & NO DATA ------------\n");
                 }
-                printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
+                else
+                {
+                    printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
+                }
             }
             else if (ParseUDP(packet, packet_length) == 1)
             {
@@ -146,16 +149,20 @@ int SniffPackets(int sockfd, int num_packets)
                 }
                 printf("------------ END OF PACKET, IP & UDP & DATA ------------\n");
             }
-            else 
+            else
             {
                 num_packets++;
                 printf("------------ END OF PACKET, NOT TCP, NOT UDP ------------\n");
             }
         }
+        else if (ParseARP(packet, packet_length) == 1)
+        {
+            printf("------------ END OF PACKET, ARP ------------\n");
+        }
         else
         {
             num_packets++;
-            printf("------------ END OF PACKET, NOT IP ------------\n");
+            printf("------------ END OF PACKET, NOT IP NOT ARP ------------\n");
         }
 
         printf("\n\n");
@@ -163,13 +170,17 @@ int SniffPackets(int sockfd, int num_packets)
     return EXIT_SUCCESS;
 }
 
-int isInterfaceValid(const char *interfaceName) {
+int isInterfaceValid(const char *interfaceName)
+{
     // Use if_nametoindex to check if the interface name is valid
     unsigned int index = if_nametoindex(interfaceName);
 
-    if (index != 0) {
+    if (index != 0)
+    {
         return 1; // Interface is valid
-    } else {
+    }
+    else
+    {
         return 0; // Interface is not valid or does not exist
     }
 }
