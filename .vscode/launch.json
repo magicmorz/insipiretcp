@@ -26,8 +26,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/mish/insipiretcp/insipiretcp",
-      "program": "/home/mish/insipiretcp/insipiretcp/build/Debug/outDebug",
+      "cwd": "/home/mish/c_stuff/insipiretcp",
+      "program": "/home/mish/c_stuff/insipiretcp/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
