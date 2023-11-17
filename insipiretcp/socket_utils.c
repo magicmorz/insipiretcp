@@ -69,108 +69,6 @@ void PrintPacketInHex(unsigned char *packet, int length)
     printf("\n");
 }
 
-int IsIpAndTcpPacket(unsigned char *packet)
-{
-    struct ethhdr *ethernet_header;
-    struct iphdr *ip_header;
-
-    /* First check if the packet contains an IP header using the Ethernet header */
-
-    ethernet_header = (struct ethhdr *)packet;
-    if (ntohs(ethernet_header->h_proto) == ETH_P_IP)
-    {
-        ip_header = (struct iphdr *)(packet + sizeof(struct ethhdr));
-
-        if (ip_header->protocol == IPPROTO_TCP)
-        {
-            return 1;
-        }
-        else
-        {
-            return -1;
-        }
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-int SniffPackets(int sockfd, int num_packets)
-{
-    char timestamp[30]; // Adjust the size as needed
-
-    for (int i = 0; i < num_packets; i++)
-    {
-        unsigned char packet[2048]; // Adjust the size as needed
-        int packet_length;
-
-        GetTimeStamp(timestamp, sizeof(timestamp));
-        printf("Timestamp: %s\n", timestamp);
-
-        // Receive a packet
-        // printf("Press Enter to continue...");
-        // getchar(); // Wait for user to press Enter
-        packet_length = recvfrom(sockfd, packet, sizeof(packet), 0, NULL, NULL);
-        if (packet_length == -1)
-        {
-            perror("Packet receive error");
-            close(sockfd);
-            return EXIT_FAILURE;
-        }
-
-        printf("Packet %d:\n", i + 1);
-
-        // Print the packet in hexadecimal form
-        PrintPacketInHex(packet, packet_length);
-
-        ParseEthernet(packet, packet_length);
-
-        if (ParseIP(packet, packet_length) == 1)
-        {
-            if (ParseTCP(packet, packet_length) == 1)
-            {
-                if (!ParseData(packet, packet_length))
-                {
-                    printf("------------ END OF PACKET, IP & TCP & NO DATA ------------\n");
-                }
-                else
-                {
-                    printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
-                }
-            }
-            else if (ParseUDP(packet, packet_length) == 1)
-            {
-                if (!ParseData(packet, packet_length))
-                {
-                    printf("------------ END OF PACKET, NO DATA ------------\n");
-                }
-                printf("------------ END OF PACKET, IP & UDP & DATA ------------\n");
-            }
-            else
-            {
-                printf("------------ END OF PACKET, NOT TCP, NOT UDP ------------\n");
-            }
-        }
-        else if (ParseIPv6(packet, packet_length) == 1)
-        {
-            printf("------------ END OF PACKET, IPv6 ------------\n");
-        }
-
-        else if (ParseARP(packet, packet_length) == 1)
-        {
-            printf("------------ END OF PACKET, ARP ------------\n");
-        }
-        else
-        {
-            printf("------------ END OF PACKET, NOT IP NOT ARP ------------\n");
-        }
-
-        printf("\n\n");
-    }
-    return EXIT_SUCCESS;
-}
-
 int isInterfaceValid(const char *interfaceName)
 {
     // Use if_nametoindex to check if the interface name is valid
@@ -184,4 +82,81 @@ int isInterfaceValid(const char *interfaceName)
     {
         return 0; // Interface is not valid or does not exist
     }
+}
+
+int DoSniffing(int sockfd, int num_packets)
+{
+    char timestamp[30]; // Adjust the size as needed
+
+    for (int i = 0; i < num_packets; i++)
+    {
+        unsigned char packet[2048]; // Adjust the size as needed
+        int packet_length;
+
+        GetTimeStamp(timestamp, sizeof(timestamp));
+        printf("Timestamp: %s\n", timestamp);
+
+        // Receive a packet
+        packet_length = recvfrom(sockfd, packet, sizeof(packet), 0, NULL, NULL);
+        if (packet_length == -1)
+        {
+            perror("Packet receive error");
+            close(sockfd);
+            return EXIT_FAILURE;
+        }
+
+        printf("Packet %d:\n", i + 1);
+
+        // Print the packet in hexadecimal form
+        PrintPacketInHex(packet, packet_length);
+
+        PacketMetadata packet_metadata;
+        ParseLayer2(packet, packet_length, &packet_metadata);
+        ParseLayer3(packet, packet_length, &packet_metadata);
+        ParseLayer4(packet, packet_length, &packet_metadata);
+
+        if (packet_metadata.layer3_protocol== ETH_P_ARP)
+        {
+            printf("------------ END OF PACKET, ARP ------------\n");
+        }
+
+        else if (packet_metadata.layer3_protocol== ETH_P_IPV6)
+        {
+            printf("------------ END OF PACKET, IPv6 ------------\n");
+        }
+        
+
+        else if (packet_metadata.layer4_protocol == IPPROTO_TCP)
+        {
+
+            if (!ParseData(packet, packet_length))
+            {
+                printf("------------ END OF PACKET, IP & TCP & NO DATA ------------\n");
+            }
+            else
+            {
+                printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
+            }
+        }
+        else if (packet_metadata.layer4_protocol == IPPROTO_UDP)
+        {
+            if (!ParseData(packet, packet_length))
+            {
+                printf("------------ END OF PACKET, IP & UDP & NO DATA ------------\n");
+            }
+            else
+            {
+                printf("------------ END OF PACKET, IP & UDP & DATA ------------\n");
+            }
+        }
+        
+        else
+        {
+            printf("------------ END OF PACKET, NOT IP NOT IPv6 NOT ARP ------------\n");
+        }
+        PrintPacketMetadata(&packet_metadata);
+        PrintPacketWithLayers(packet, packet_length, &packet_metadata);
+        printf("\n\n");
+    }
+    return EXIT_SUCCESS;
 }

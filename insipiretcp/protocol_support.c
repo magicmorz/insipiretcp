@@ -22,7 +22,7 @@ void ParseEthernet(unsigned char *packet, size_t len)
     }
 }
 
-int ParseIP(unsigned char *packet, size_t len)
+int ParseIP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
 {
     struct ethhdr *ethernet_header;
     struct iphdr *ip_header;
@@ -51,6 +51,11 @@ int ParseIP(unsigned char *packet, size_t len)
             printf("ttl: %u\n", ip_header->ttl);
             printf("protocol is: %u\n", ip_header->protocol);
             printf("checksum is: %04x\n", ip_header->check);
+
+            // Update packet_metadata with Layer 4 information and IPv4 segment size
+            packet_metadata->layer4_protocol = ip_header->protocol;
+            packet_metadata->layer3_size_bytes = ip_header->ihl * 4;
+
             return 1;
         }
         else
@@ -66,7 +71,7 @@ int ParseIP(unsigned char *packet, size_t len)
     }
 }
 
-int ParseIPv6(unsigned char *packet, size_t len)
+int ParseIPv6(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
 {
     // IPv6 Header Structure
     struct ipv6hdr
@@ -80,7 +85,8 @@ int ParseIPv6(unsigned char *packet, size_t len)
         uint8_t destination_ip[16]; // 128-bit Destination IPv6 Address
     };
 
-      if (len >= sizeof(struct ipv6hdr)) {
+    if (len >= sizeof(struct ipv6hdr))
+    {
         // Create a pointer to the IPv6 header structure
         const struct ipv6hdr *ipv6_header = (struct ipv6hdr *)(packet + sizeof(struct ethhdr));
 
@@ -110,14 +116,23 @@ int ParseIPv6(unsigned char *packet, size_t len)
         printf("Source IP: %s\n", source_ip_str);
         printf("Destination IP: %s\n", dest_ip_str);
 
+        // Calculate the size of the IPv6 segment (excluding other layers)
+        size_t ipv6_segment_size = ntohs(ipv6_header->payload_length);
+
+        // Update packet_metadata with Layer 4 information and IPv6 segment size
+        packet_metadata->layer4_protocol = ipv6_header->next_header;
+        packet_metadata->layer4_size_bytes = ipv6_segment_size;
+
         return 1;
-    } else {
+    }
+    else
+    {
         perror("IPv6 packet is too short");
         return -1;
     }
 }
 
-int ParseARP(unsigned char *packet, size_t len)
+int ParseARP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
 {
 
     // Define the ARP structure
@@ -169,6 +184,13 @@ int ParseARP(unsigned char *packet, size_t len)
                    arp_header->ar_tip[0], arp_header->ar_tip[1],
                    arp_header->ar_tip[2], arp_header->ar_tip[3]);
 
+            // Calculate the size of the ARP segment (excluding other layers)
+            size_t arp_segment_size = sizeof(struct arphdr);
+
+            // Update packet_metadata with Layer 4 information and ARP segment size
+            packet_metadata->layer4_protocol = ntohs(arp_header->ar_op);
+            packet_metadata->layer4_size_bytes = arp_segment_size;
+
             return 1;
         }
         else
@@ -184,7 +206,7 @@ int ParseARP(unsigned char *packet, size_t len)
     }
 }
 
-int ParseTCP(unsigned char *packet, size_t len)
+int ParseTCP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
 {
     struct ethhdr *ethernet_header;
     struct iphdr *ip_header;
@@ -207,6 +229,13 @@ int ParseTCP(unsigned char *packet, size_t len)
                 /* Print the Dest and Src ports */
                 printf("Source Port: %d\n", ntohs(tcp_header->source));
                 printf("Dest Port: %d\n", ntohs(tcp_header->dest));
+
+                // Calculate the size of the TCP segment (excluding other layers)
+                size_t tcp_segment_size = tcp_header->doff * 4;
+
+                // Update packet_metadata with Layer 4 information and TCP segment size
+                packet_metadata->layer4_protocol = IPPROTO_TCP;
+                packet_metadata->layer4_size_bytes = tcp_segment_size;
                 return 1;
             }
             else
@@ -224,7 +253,7 @@ int ParseTCP(unsigned char *packet, size_t len)
     return -1;
 }
 
-int ParseUDP(unsigned char *packet, size_t len)
+int ParseUDP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
 {
     struct ethhdr *ethernet_header;
     struct iphdr *ip_header;
@@ -247,6 +276,13 @@ int ParseUDP(unsigned char *packet, size_t len)
                 /* Print the Dest and Src ports */
                 printf("Source Port: %d\n", ntohs(udp_header->source));
                 printf("Dest Port: %d\n", ntohs(udp_header->dest));
+
+                // Calculate the size of the UDP segment (excluding other layers)
+                size_t udp_segment_size = sizeof(struct udphdr);
+
+                // Update packet_metadata with Layer 4 information and UDP segment size
+                packet_metadata->layer4_protocol = IPPROTO_UDP;
+                packet_metadata->layer4_size_bytes = udp_segment_size;
                 return 1;
             }
             else
@@ -298,4 +334,144 @@ int ParseData(unsigned char *packet, size_t len)
         printf("No Data in packet\n");
         return 0;
     }
+}
+
+int ParseLayer2(unsigned char *packet, size_t packet_length, PacketMetadata *packet_metadata)
+{
+    struct ethhdr *ethernet_header;
+
+    if (packet_length >= sizeof(struct ethhdr))
+    {
+        // Cast the packet to the Ethernet header structure
+        ethernet_header = (struct ethhdr *)packet;
+
+        // Print Ethernet header information
+        printf("---- Ethernet ----- \n");
+        PrintInHex("Destination MAC: ", ethernet_header->h_dest, 6);
+        printf("\n");
+        PrintInHex("Source MAC: ", ethernet_header->h_source, 6);
+        printf("\n");
+        PrintInHex("Protocol: ", (void *)&ethernet_header->h_proto, 2);
+        printf("\n");
+
+        // Set the layer2_size_bytes in the PacketMetadata struct
+        packet_metadata->layer2_size_bytes = sizeof(struct ethhdr);
+
+        // Save the protocol of the next layer to metadata
+        packet_metadata->layer3_protocol = ntohs(ethernet_header->h_proto);
+    }
+    else
+    {
+        perror("Packet is too short for Ethernet\n");
+        return -1; // Indicate an error
+    }
+
+    return 0; // Successful parsing
+}
+
+int ParseLayer3(unsigned char *packet, size_t packet_length, PacketMetadata *packet_metadata)
+{
+    // Check the protocol type saved in packet_metadata->layer3_protocol
+    switch (packet_metadata->layer3_protocol)
+    {
+    case ETH_P_IP:
+        return ParseIP(packet, packet_length, packet_metadata);
+
+    case ETH_P_IPV6:
+        return ParseIPv6(packet, packet_length, packet_metadata);
+
+    case ETH_P_ARP:
+        return ParseARP(packet, packet_length, packet_metadata);
+
+    default:
+        printf("Unknown Layer 3 protocol (0x%04x)\n", packet_metadata->layer3_protocol);
+        return -1;
+    }
+}
+
+int ParseLayer4(unsigned char *packet, size_t packet_length, PacketMetadata *packet_metadata)
+{
+    // Check the protocol type saved in packet_metadata->layer4_protocol
+    switch (packet_metadata->layer4_protocol)
+    {
+    case IPPROTO_TCP:
+        return ParseTCP(packet, packet_length, packet_metadata);
+
+    case IPPROTO_UDP:
+        return ParseUDP(packet, packet_length, packet_metadata);
+
+    default:
+        printf("Unknown Layer 4 protocol (0x%04x)\n", packet_metadata->layer4_protocol);
+        return -1;
+    }
+}
+
+void PrintPacketMetadata(const PacketMetadata* packet_metadata)
+{
+    printf("------------ Packet Metadata ------------\n");
+    printf("Layer 2 Protocol: 0x%04x\n", packet_metadata->layer2_protocol);
+    printf("Layer 3 Protocol: 0x%04x\n", packet_metadata->layer3_protocol);
+    printf("Layer 4 Protocol: 0x%04x\n", packet_metadata->layer4_protocol);
+    printf("Layer 2 Size (bytes): %zu\n", (size_t)packet_metadata->layer2_size_bytes);
+    printf("Layer 3 Size (bytes): %zu\n", (size_t)packet_metadata->layer3_size_bytes);
+    printf("Layer 4 Size (bytes): %zu\n", (size_t)packet_metadata->layer4_size_bytes);
+    printf("------------ End of Packet Metadata ------------\n");
+}
+void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetadata *packet_metadata)
+{
+    int current_position = 0;
+    printf("------------ Packet Layers Display Start ------------\n");
+    // Print the Layer 2 if it exists
+    if (packet_metadata->layer2_size_bytes > 0)
+    {
+        printf("---- Layer 2 Header ----\n");
+        for (int i = 0; i < packet_metadata->layer2_size_bytes; i++)
+        {
+            printf("%02x ", packet[current_position]);
+            current_position++;
+        }
+        printf("\n");
+    }
+
+    // Print the Layer 3 header if it exists
+    if (packet_metadata->layer3_size_bytes > 0)
+    {
+        printf("---- Layer 3 Header ----\n");
+        for (int i = 0; i < packet_metadata->layer3_size_bytes; i++)
+        {
+            printf("%02x ", packet[current_position]);
+            current_position++;
+        }
+        printf("\n");
+    }
+
+    // Print the Layer 4 header if it exists
+    if (packet_metadata->layer4_size_bytes > 0)
+    {
+        printf("---- Layer 4 Header ----\n");
+        for (int i = 0; i < packet_metadata->layer4_size_bytes; i++)
+        {
+            printf("%02x ", packet[current_position]);
+            current_position++;
+        }
+        printf("\n");
+    }
+
+    // Print the remaining payload
+    if (current_position < length)
+    {
+        printf("---- Payload ----\n");
+        for (int i = current_position; i < length; i++)
+        {
+            printf("%02x ", packet[i]);
+            if ((i + 1) % 16 == 0)
+            {
+                printf("\n");
+            }
+        }
+        printf("\n");
+    }
+
+    printf("------------ Packet Layers Display End ------------\n");
+
 }
