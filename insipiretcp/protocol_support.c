@@ -121,7 +121,7 @@ int ParseIPv6(unsigned char *packet, size_t len, PacketMetadata *packet_metadata
 
         // Update packet_metadata with Layer 4 information and IPv6 segment size
         packet_metadata->layer4_protocol = ipv6_header->next_header;
-        packet_metadata->layer4_size_bytes = ipv6_segment_size;
+        packet_metadata->layer3_size_bytes = ipv6_segment_size;
 
         return 1;
     }
