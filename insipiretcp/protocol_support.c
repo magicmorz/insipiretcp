@@ -411,34 +411,17 @@ void PrintPacketMetadata(const PacketMetadata *packet_metadata)
 {
     printf("------------ Packet Metadata ------------\n");
     printf("Layer 2 Protocol: 0x%04x\n", packet_metadata->layer2_protocol_id);
-    printf("Layer 3 Protocol: 0x%04x\n", packet_metadata->layer3_protocol_id);
-    printf("Layer 4 Protocol: 0x%04x\n", packet_metadata->layer4_protocol_id);
+    printf("Layer 3 Protocol: 0x%04x (%s)\n", packet_metadata->layer3_protocol_id, ether_protocol_ntoa(packet_metadata->layer3_protocol_id));
+    printf("Layer 4 Protocol: 0x%04x (%s)\n", packet_metadata->layer4_protocol_id, ether_protocol_ntoa(packet_metadata->layer4_protocol_id));
     printf("Layer 2 Size (bytes): %zu\n", (size_t)packet_metadata->layer2_size_bytes);
     printf("Layer 3 Size (bytes): %zu\n", (size_t)packet_metadata->layer3_size_bytes);
     printf("Layer 4 Size (bytes): %zu\n", (size_t)packet_metadata->layer4_size_bytes);
     printf("------------ End of Packet Metadata ------------\n");
 }
-// Mapping function for converting protocol ID to string
-const char *ether_protocol_ntoa(unsigned short protocol_id) {
-    switch (protocol_id) {
-        case ETH_P_IP:
-            return "IPv4";
-        case ETH_P_IPV6:
-            return "IPv6";
-        case ETH_P_ARP:
-            return "ARP";
-        case IPPROTO_TCP:
-            return "TCP";
-        case IPPROTO_UDP:
-            return "UDP";
-        // Add more cases as needed
-        default:
-            return NULL; // Unknown protocol ID
-    }
-}
 void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetadata *packet_metadata)
 {
     int current_position = 0;
+    int* p_current_position = &current_position;
     printf("------------ Packet Layers Display Start ------------\n");
     // Print the Layer 2 if it exists
     if (packet_metadata->layer2_size_bytes > 0)
@@ -446,7 +429,7 @@ void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetada
         printf("---- Layer 2 Header ----\n");
         for (int i = 0; i < packet_metadata->layer2_size_bytes; i++)
         {
-            printf("%02x ", packet[current_position]);
+            printf("%02x ", packet[*p_current_position]);
             current_position++;
         }
         printf("\n");
@@ -455,42 +438,20 @@ void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetada
     // Print the Layer 3 header if it exists
     if (packet_metadata->layer3_size_bytes > 0)
     {
-        // Convert protocol ID to protocol name
-        const char *protocol_name = ether_protocol_ntoa(packet_metadata->layer3_protocol_id);
-
-        if (protocol_name != NULL)
-        {
-            printf("---- Layer 3 Header %s ----\n", protocol_name);
-            for (int i = 0; i < packet_metadata->layer3_size_bytes; i++)
-            {
-                printf("%02x ", packet[current_position]);
-                current_position++;
-            }
-            printf("\n");
-        }
-        else
-        {
-            fprintf(stderr, "Unknown protocol ID: 0x%04X\n", packet_metadata->layer3_protocol_id);
-        }
+        PrintLayer(packet_metadata->layer3_protocol_id, p_current_position, packet_metadata->layer3_size_bytes, packet);
     }
 
     // Print the Layer 4 header if it exists
     if (packet_metadata->layer4_size_bytes > 0)
     {
-        printf("---- Layer 4 Header ----\n");
-        for (int i = 0; i < packet_metadata->layer4_size_bytes; i++)
-        {
-            printf("%02x ", packet[current_position]);
-            current_position++;
-        }
-        printf("\n");
+        PrintLayer(packet_metadata->layer4_protocol_id, p_current_position, packet_metadata->layer4_size_bytes, packet);
     }
 
     // Print the remaining payload
-    if (current_position < length)
+    if (*p_current_position < length)
     {
         printf("---- Payload ----\n");
-        for (int i = current_position; i < length; i++)
+        for (int i = *p_current_position; i < length; i++)
         {
             printf("%02x ", packet[i]);
             if ((i + 1) % 16 == 0)
@@ -503,4 +464,3 @@ void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetada
 
     printf("------------ Packet Layers Display End ------------\n");
 }
-
