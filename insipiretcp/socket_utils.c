@@ -115,18 +115,18 @@ int DoSniffing(int sockfd, int num_packets)
         ParseLayer3(packet, packet_length, &packet_metadata);
         ParseLayer4(packet, packet_length, &packet_metadata);
 
-        if (packet_metadata.layer3_protocol== ETH_P_ARP)
+        if (packet_metadata.layer3_protocol_id== ETH_P_ARP)
         {
             printf("------------ END OF PACKET, ARP ------------\n");
         }
 
-        else if (packet_metadata.layer3_protocol== ETH_P_IPV6)
+        else if (packet_metadata.layer3_protocol_id== ETH_P_IPV6)
         {
             printf("------------ END OF PACKET, IPv6 ------------\n");
         }
         
 
-        else if (packet_metadata.layer4_protocol == IPPROTO_TCP)
+        else if (packet_metadata.layer4_protocol_id == IPPROTO_TCP)
         {
 
             if (!ParseData(packet, packet_length))
@@ -138,7 +138,7 @@ int DoSniffing(int sockfd, int num_packets)
                 printf("------------ END OF PACKET, IP & TCP & DATA ------------\n");
             }
         }
-        else if (packet_metadata.layer4_protocol == IPPROTO_UDP)
+        else if (packet_metadata.layer4_protocol_id == IPPROTO_UDP)
         {
             if (!ParseData(packet, packet_length))
             {

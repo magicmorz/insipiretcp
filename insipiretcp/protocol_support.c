@@ -1,6 +1,7 @@
 #include "common.h"
 #include "general_utils.h"
 #include "socket_utils.h"
+#include <netinet/if_ether.h>
 void ParseEthernet(unsigned char *packet, size_t len)
 {
 
@@ -53,7 +54,7 @@ int ParseIP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
             printf("checksum is: %04x\n", ip_header->check);
 
             // Update packet_metadata with Layer 4 information and IPv4 segment size
-            packet_metadata->layer4_protocol = ip_header->protocol;
+            packet_metadata->layer4_protocol_id = ip_header->protocol;
             packet_metadata->layer3_size_bytes = ip_header->ihl * 4;
 
             return 1;
@@ -120,7 +121,7 @@ int ParseIPv6(unsigned char *packet, size_t len, PacketMetadata *packet_metadata
         size_t ipv6_segment_size = ntohs(ipv6_header->payload_length);
 
         // Update packet_metadata with Layer 4 information and IPv6 segment size
-        packet_metadata->layer4_protocol = ipv6_header->next_header;
+        packet_metadata->layer4_protocol_id = ipv6_header->next_header;
         packet_metadata->layer3_size_bytes = ipv6_segment_size;
 
         return 1;
@@ -188,7 +189,7 @@ int ParseARP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
             size_t arp_segment_size = sizeof(struct arphdr);
 
             // Update packet_metadata with Layer 4 information and ARP segment size
-            packet_metadata->layer4_protocol = ntohs(arp_header->ar_op);
+            packet_metadata->layer4_protocol_id = ntohs(arp_header->ar_op);
             packet_metadata->layer4_size_bytes = arp_segment_size;
 
             return 1;
@@ -234,7 +235,7 @@ int ParseTCP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
                 size_t tcp_segment_size = tcp_header->doff * 4;
 
                 // Update packet_metadata with Layer 4 information and TCP segment size
-                packet_metadata->layer4_protocol = IPPROTO_TCP;
+                packet_metadata->layer4_protocol_id = IPPROTO_TCP;
                 packet_metadata->layer4_size_bytes = tcp_segment_size;
                 return 1;
             }
@@ -281,7 +282,7 @@ int ParseUDP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
                 size_t udp_segment_size = sizeof(struct udphdr);
 
                 // Update packet_metadata with Layer 4 information and UDP segment size
-                packet_metadata->layer4_protocol = IPPROTO_UDP;
+                packet_metadata->layer4_protocol_id = IPPROTO_UDP;
                 packet_metadata->layer4_size_bytes = udp_segment_size;
                 return 1;
             }
@@ -358,7 +359,7 @@ int ParseLayer2(unsigned char *packet, size_t packet_length, PacketMetadata *pac
         packet_metadata->layer2_size_bytes = sizeof(struct ethhdr);
 
         // Save the protocol of the next layer to metadata
-        packet_metadata->layer3_protocol = ntohs(ethernet_header->h_proto);
+        packet_metadata->layer3_protocol_id = ntohs(ethernet_header->h_proto);
     }
     else
     {
@@ -371,8 +372,8 @@ int ParseLayer2(unsigned char *packet, size_t packet_length, PacketMetadata *pac
 
 int ParseLayer3(unsigned char *packet, size_t packet_length, PacketMetadata *packet_metadata)
 {
-    // Check the protocol type saved in packet_metadata->layer3_protocol
-    switch (packet_metadata->layer3_protocol)
+    // Check the protocol type saved in packet_metadata->layer3_protocol_id
+    switch (packet_metadata->layer3_protocol_id)
     {
     case ETH_P_IP:
         return ParseIP(packet, packet_length, packet_metadata);
@@ -384,15 +385,15 @@ int ParseLayer3(unsigned char *packet, size_t packet_length, PacketMetadata *pac
         return ParseARP(packet, packet_length, packet_metadata);
 
     default:
-        printf("Unknown Layer 3 protocol (0x%04x)\n", packet_metadata->layer3_protocol);
+        printf("Unknown Layer 3 protocol (0x%04x)\n", packet_metadata->layer3_protocol_id);
         return -1;
     }
 }
 
 int ParseLayer4(unsigned char *packet, size_t packet_length, PacketMetadata *packet_metadata)
 {
-    // Check the protocol type saved in packet_metadata->layer4_protocol
-    switch (packet_metadata->layer4_protocol)
+    // Check the protocol type saved in packet_metadata->layer4_protocol_id
+    switch (packet_metadata->layer4_protocol_id)
     {
     case IPPROTO_TCP:
         return ParseTCP(packet, packet_length, packet_metadata);
@@ -401,21 +402,39 @@ int ParseLayer4(unsigned char *packet, size_t packet_length, PacketMetadata *pac
         return ParseUDP(packet, packet_length, packet_metadata);
 
     default:
-        printf("Unknown Layer 4 protocol (0x%04x)\n", packet_metadata->layer4_protocol);
+        printf("Unknown Layer 4 protocol (0x%04x)\n", packet_metadata->layer4_protocol_id);
         return -1;
     }
 }
 
-void PrintPacketMetadata(const PacketMetadata* packet_metadata)
+void PrintPacketMetadata(const PacketMetadata *packet_metadata)
 {
     printf("------------ Packet Metadata ------------\n");
-    printf("Layer 2 Protocol: 0x%04x\n", packet_metadata->layer2_protocol);
-    printf("Layer 3 Protocol: 0x%04x\n", packet_metadata->layer3_protocol);
-    printf("Layer 4 Protocol: 0x%04x\n", packet_metadata->layer4_protocol);
+    printf("Layer 2 Protocol: 0x%04x\n", packet_metadata->layer2_protocol_id);
+    printf("Layer 3 Protocol: 0x%04x\n", packet_metadata->layer3_protocol_id);
+    printf("Layer 4 Protocol: 0x%04x\n", packet_metadata->layer4_protocol_id);
     printf("Layer 2 Size (bytes): %zu\n", (size_t)packet_metadata->layer2_size_bytes);
     printf("Layer 3 Size (bytes): %zu\n", (size_t)packet_metadata->layer3_size_bytes);
     printf("Layer 4 Size (bytes): %zu\n", (size_t)packet_metadata->layer4_size_bytes);
     printf("------------ End of Packet Metadata ------------\n");
+}
+// Mapping function for converting protocol ID to string
+const char *ether_protocol_ntoa(unsigned short protocol_id) {
+    switch (protocol_id) {
+        case ETH_P_IP:
+            return "IPv4";
+        case ETH_P_IPV6:
+            return "IPv6";
+        case ETH_P_ARP:
+            return "ARP";
+        case IPPROTO_TCP:
+            return "TCP";
+        case IPPROTO_UDP:
+            return "UDP";
+        // Add more cases as needed
+        default:
+            return NULL; // Unknown protocol ID
+    }
 }
 void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetadata *packet_metadata)
 {
@@ -436,13 +455,23 @@ void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetada
     // Print the Layer 3 header if it exists
     if (packet_metadata->layer3_size_bytes > 0)
     {
-        printf("---- Layer 3 Header ----\n");
-        for (int i = 0; i < packet_metadata->layer3_size_bytes; i++)
+        // Convert protocol ID to protocol name
+        const char *protocol_name = ether_protocol_ntoa(packet_metadata->layer3_protocol_id);
+
+        if (protocol_name != NULL)
         {
-            printf("%02x ", packet[current_position]);
-            current_position++;
+            printf("---- Layer 3 Header %s ----\n", protocol_name);
+            for (int i = 0; i < packet_metadata->layer3_size_bytes; i++)
+            {
+                printf("%02x ", packet[current_position]);
+                current_position++;
+            }
+            printf("\n");
         }
-        printf("\n");
+        else
+        {
+            fprintf(stderr, "Unknown protocol ID: 0x%04X\n", packet_metadata->layer3_protocol_id);
+        }
     }
 
     // Print the Layer 4 header if it exists
@@ -473,5 +502,5 @@ void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetada
     }
 
     printf("------------ Packet Layers Display End ------------\n");
-
 }
+

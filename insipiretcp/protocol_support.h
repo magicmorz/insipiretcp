@@ -1,7 +1,7 @@
 // protocol_support.h
 #ifndef PROTOCOL_SUPPORT_H
 #define PROTOCOL_SUPPORT_H
-
+#include "common.h"
 void ParseEthernet(unsigned char *packet, int len);
 int ParseIP(unsigned char *packet, int len, PacketMetadata* packet_metadata);
 int ParseIPv6(unsigned char *packet, size_t len, PacketMetadata* packet_metadata);
