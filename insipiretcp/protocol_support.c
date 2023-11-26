@@ -247,7 +247,7 @@ int ParseTCP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
         }
         else
         {
-            printf("Not an IP packet\n");
+            // printf("Not an IP packet\n");
             return -1;
         }
     }
