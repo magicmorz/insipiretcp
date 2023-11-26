@@ -412,7 +412,7 @@ void PrintPacketMetadata(const PacketMetadata *packet_metadata)
     printf("------------ Packet Metadata ------------\n");
     printf("Layer 2 Protocol: 0x%04x\n", packet_metadata->layer2_protocol_id);
     printf("Layer 3 Protocol: 0x%04x (%s)\n", packet_metadata->layer3_protocol_id, ether_protocol_ntoa(packet_metadata->layer3_protocol_id));
-    printf("Layer 4 Protocol: 0x%04x (%s)\n", packet_metadata->layer4_protocol_id, ether_protocol_ntoa(packet_metadata->layer4_protocol_id));
+    printf("Layer 4 Protocol: 0x%04x (%s)\n", packet_metadata->layer4_protocol_id, (ether_protocol_ntoa(packet_metadata->layer4_protocol_id)!=NULL)?ether_protocol_ntoa(packet_metadata->layer4_protocol_id): "unknown");
     printf("Layer 2 Size (bytes): %zu\n", (size_t)packet_metadata->layer2_size_bytes);
     printf("Layer 3 Size (bytes): %zu\n", (size_t)packet_metadata->layer3_size_bytes);
     printf("Layer 4 Size (bytes): %zu\n", (size_t)packet_metadata->layer4_size_bytes);
