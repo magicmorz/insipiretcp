@@ -110,11 +110,9 @@ int DoSniffing(int sockfd, int num_packets)
         // Print the packet in hexadecimal form
         PrintPacketInHex(packet, packet_length);
 
-        PacketMetadata packet_metadata;
+        PacketMetadata packet_metadata = {0,0,0,0,0,0,0};
         ParseLayer2(packet, packet_length, &packet_metadata);
         ParseLayer3(packet, packet_length, &packet_metadata);
-        ParseLayer4(packet, packet_length, &packet_metadata);
-
         if (packet_metadata.layer3_protocol_id== ETH_P_ARP)
         {
             printf("------------ END OF PACKET, ARP ------------\n");
@@ -125,6 +123,10 @@ int DoSniffing(int sockfd, int num_packets)
             printf("------------ END OF PACKET, IPv6 ------------\n");
         }
         
+        else if (packet_metadata.number_of_layers>=4)
+        {
+            ParseLayer4(packet, packet_length, &packet_metadata);
+        }
 
         else if (packet_metadata.layer4_protocol_id == IPPROTO_TCP)
         {

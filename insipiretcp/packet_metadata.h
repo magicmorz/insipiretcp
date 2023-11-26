@@ -19,6 +19,9 @@ struct PacketMetadata
     // Layer 4 information
     unsigned short layer4_protocol_id; // Protocol type at Layer 4
     unsigned short layer4_size_bytes;  // Size of Layer 4 in bytes
+
+    // General information
+    unsigned short number_of_layers; // amount of OSI layers in the packet
 };
 
 // Typedef for convenience

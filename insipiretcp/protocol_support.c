@@ -56,6 +56,10 @@ int ParseIP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
             // Update packet_metadata with Layer 4 information and IPv4 segment size
             packet_metadata->layer4_protocol_id = ip_header->protocol;
             packet_metadata->layer3_size_bytes = ip_header->ihl * 4;
+            if (ip_header->protocol)
+            {
+                packet_metadata->number_of_layers = 4;
+            }
 
             return 1;
         }
@@ -123,6 +127,10 @@ int ParseIPv6(unsigned char *packet, size_t len, PacketMetadata *packet_metadata
         // Update packet_metadata with Layer 4 information and IPv6 segment size
         packet_metadata->layer4_protocol_id = ipv6_header->next_header;
         packet_metadata->layer3_size_bytes = ipv6_segment_size;
+        if (packet_metadata->layer4_protocol_id)
+        {
+            packet_metadata->number_of_layers = 4;
+        }
 
         return 1;
     }
@@ -190,8 +198,8 @@ int ParseARP(unsigned char *packet, size_t len, PacketMetadata *packet_metadata)
 
             // Update packet_metadata with Layer 4 information and ARP segment size
             packet_metadata->layer4_protocol_id = ntohs(arp_header->ar_op);
-            packet_metadata->layer4_size_bytes = arp_segment_size;
-
+            packet_metadata->layer3_size_bytes = arp_segment_size;
+            packet_metadata->number_of_layers = 3;
             return 1;
         }
         else
@@ -412,7 +420,7 @@ void PrintPacketMetadata(const PacketMetadata *packet_metadata)
     printf("------------ Packet Metadata ------------\n");
     printf("Layer 2 Protocol: 0x%04x\n", packet_metadata->layer2_protocol_id);
     printf("Layer 3 Protocol: 0x%04x (%s)\n", packet_metadata->layer3_protocol_id, ether_protocol_ntoa(packet_metadata->layer3_protocol_id));
-    printf("Layer 4 Protocol: 0x%04x (%s)\n", packet_metadata->layer4_protocol_id, (ether_protocol_ntoa(packet_metadata->layer4_protocol_id)!=NULL)?ether_protocol_ntoa(packet_metadata->layer4_protocol_id): "unknown");
+    printf("Layer 4 Protocol: 0x%04x (%s)\n", packet_metadata->layer4_protocol_id, (ether_protocol_ntoa(packet_metadata->layer4_protocol_id) != NULL) ? ether_protocol_ntoa(packet_metadata->layer4_protocol_id) : "unknown");
     printf("Layer 2 Size (bytes): %zu\n", (size_t)packet_metadata->layer2_size_bytes);
     printf("Layer 3 Size (bytes): %zu\n", (size_t)packet_metadata->layer3_size_bytes);
     printf("Layer 4 Size (bytes): %zu\n", (size_t)packet_metadata->layer4_size_bytes);
@@ -421,7 +429,7 @@ void PrintPacketMetadata(const PacketMetadata *packet_metadata)
 void PrintPacketWithLayers(unsigned char *packet, int length, const PacketMetadata *packet_metadata)
 {
     int current_position = 0;
-    int* p_current_position = &current_position;
+    int *p_current_position = &current_position;
     printf("------------ Packet Layers Display Start ------------\n");
     // Print the Layer 2 if it exists
     if (packet_metadata->layer2_size_bytes > 0)

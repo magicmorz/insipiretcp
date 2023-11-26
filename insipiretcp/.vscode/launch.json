@@ -2,6 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "(gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/home/mish/insipiretcp/insipiretcp/sniffer",
+      "args": [
+        "enp0s3",
+        "100"
+      ],
+      "stopAtEntry": false,
+      "cwd": "/home/mish/insipiretcp/insipiretcp/",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/home/mish/insipiretcp/gdb_root.sh",
+      "preLaunchTask": "Build Sniffer",
+      "postDebugTask": "clean"
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
