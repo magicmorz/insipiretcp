@@ -88,7 +88,7 @@ int DoSniffing(int sockfd, int num_packets)
 {
     char timestamp[30]; // Adjust the size as needed
 
-    for (int i = 0; i < num_packets; i++)
+    for (int i = 0;(num_packets <= 0)||(i < num_packets); i++)
     {
         unsigned char packet[2048]; // Adjust the size as needed
         int packet_length;
