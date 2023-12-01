@@ -11,6 +11,7 @@
               "${workspaceFolder}/insipiretcp/debug_utils.c",
               "${workspaceFolder}/insipiretcp/general_utils.c",
               "${workspaceFolder}/insipiretcp/protocol_support.c",
+              "${workspaceFolder}/insipiretcp/cli_utils.c",
               "${workspaceFolder}/insipiretcp/main.c",
               "-o",
               "${workspaceFolder}/insipiretcp/${fileBasenameNoExtension}"

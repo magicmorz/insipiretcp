@@ -7,8 +7,12 @@
       "request": "launch",
       "program": "${fileDirname}/${fileBasenameNoExtension}",
       "args": [
-        "enp0s3",
-        "1"
+        "-i",
+        "eth0",
+        "-p",
+        "8080",
+        "-n",
+        "100"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
