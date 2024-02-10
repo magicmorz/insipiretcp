@@ -8,11 +8,9 @@
       "program": "${fileDirname}/${fileBasenameNoExtension}",
       "args": [
         "-i",
-        "eth0",
-        "-p",
-        "8080",
+        "enp0s3",
         "-n",
-        "100"
+        "2"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
