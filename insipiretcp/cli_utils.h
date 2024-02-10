@@ -7,7 +7,8 @@
 typedef struct {
     char *interface;
     int port;
-    int num_packets;  
+    int num_packets;
+    FILE *fptr;   
 } CommandLineOptions;
 
 // Function declarations

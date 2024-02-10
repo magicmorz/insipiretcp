@@ -3,7 +3,12 @@
 #include "socket_utils.h"
 #include "protocol_support.h"
 #include "general_utils.h"
+#include "capture/pcapng/pcapng.h"
+#include "file/file_pcapng/file_pcapng_utils.h"
+
 #define ERROR -1
+#define LINKTYPE_ETHERNET 1
+
 int CreateRawSocket(int protocol_to_sniff)
 {
     int sock_desc;
@@ -88,7 +93,26 @@ int DoSniffing(int sockfd, int num_packets)
 {
     char timestamp[30]; // Adjust the size as needed
 
-    for (int i = 0;(num_packets <= 0)||(i < num_packets); i++)
+    PCAPNG *capture = createPCAPNG();
+    if (capture == NULL)
+    {
+        fprintf(stderr, "Failed to create PCAPNG structure\n");
+        return EXIT_FAILURE;
+    }
+
+    // Create an Interface Description Block (IDB) for the interface
+    IDB *idb = createIDB(LINKTYPE_ETHERNET);
+    if (idb == NULL)
+    {
+        fprintf(stderr, "Failed to create IDB\n");
+        freePCAPNG(capture); // Free the PCAPNG structure before exiting
+        return EXIT_FAILURE;
+    }
+
+    // Add the IDB to the PCAPNG structure
+    addIDBNode(capture, idb);
+
+    for (int i = 0; (num_packets <= 0) || (i < num_packets); i++)
     {
         unsigned char packet[2048]; // Adjust the size as needed
         int packet_length;
@@ -104,26 +128,38 @@ int DoSniffing(int sockfd, int num_packets)
             close(sockfd);
             return EXIT_FAILURE;
         }
+        // Create a new EPB for the captured packet
+        EPB *epb = createEPB(1, packet_length, packet_length, packet);
+        if (epb == NULL)
+        {
+            fprintf(stderr, "Failed to create EPB for packet %d\n", i + 1);
+            // Free memory allocated for previously captured packets
+            freePCAPNG(capture);
+            return EXIT_FAILURE;
+        }
+
+        // Add the EPB to the PCAPNG structure
+        addEPBNode(capture, epb);
 
         printf("Packet %d:\n", i + 1);
 
         // Print the packet in hexadecimal form
         PrintPacketInHex(packet, packet_length);
 
-        PacketMetadata packet_metadata = {0,0,0,0,0,0,0};
+        PacketMetadata packet_metadata = {0, 0, 0, 0, 0, 0, 0};
         ParseLayer2(packet, packet_length, &packet_metadata);
         ParseLayer3(packet, packet_length, &packet_metadata);
-        if (packet_metadata.layer3_protocol_id== ETH_P_ARP)
+        if (packet_metadata.layer3_protocol_id == ETH_P_ARP)
         {
             printf("------------ END OF PACKET, ARP ------------\n");
         }
 
-        else if (packet_metadata.layer3_protocol_id== ETH_P_IPV6)
+        else if (packet_metadata.layer3_protocol_id == ETH_P_IPV6)
         {
             printf("------------ END OF PACKET, IPv6 ------------\n");
         }
-        
-        else if (packet_metadata.number_of_layers>=4)
+
+        else if (packet_metadata.number_of_layers >= 4)
         {
             ParseLayer4(packet, packet_length, &packet_metadata);
         }
@@ -151,7 +187,7 @@ int DoSniffing(int sockfd, int num_packets)
                 printf("------------ END OF PACKET, IP & UDP & DATA ------------\n");
             }
         }
-        
+
         else
         {
             printf("------------ END OF PACKET, NOT IP NOT IPv6 NOT ARP ------------\n");
@@ -159,6 +195,17 @@ int DoSniffing(int sockfd, int num_packets)
         PrintPacketMetadata(&packet_metadata);
         PrintPacketWithLayers(packet, packet_length, &packet_metadata);
         printf("\n\n");
+    }
+
+    printf("DONE PRINTING GARBAGE NOW PRINTING PCAPNG STRUCTURE\n");
+    printPCAPNG(capture);
+    // Save the PCAPNG structure to a file (you need to implement this function)
+    if (savePCAPNGToFile(capture, "output/captured_packets.pcapng") != 0)
+    {
+        fprintf(stderr, "Failed to save PCAPNG structure to file\n");
+        // Free memory allocated for the PCAPNG structure
+        freePCAPNG(capture);
+        return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }

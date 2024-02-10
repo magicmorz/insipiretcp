@@ -18,6 +18,7 @@ void process_options(int argc, char *argv[], CommandLineOptions *options)
     options->interface = NULL;
     options->port = -1;
     options->num_packets = -1;
+    options->fptr = NULL;
 
     // Define long options
     static struct option long_options[] = {
