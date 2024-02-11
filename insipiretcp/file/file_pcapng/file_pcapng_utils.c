@@ -6,6 +6,8 @@
 // Function to save PCAPNG structure to a file
 int savePCAPNGToFile(PCAPNG *pcapng, const char *filename) {
     FILE *file = fopen(filename, "wb");
+    // If the file can be opened successfully, its contents will be truncated, 
+    // meaning all existing data will be deleted
     if (file == NULL) {
         perror("Failed to open file for writing");
         return -1;

@@ -13,20 +13,27 @@ SRC = general_utils.c protocol_support.c debug_utils.c \
  file/file_pcapng/file_pcapng_utils.c
 
 # Object files
-OBJ = $(SRC:.c=.o)
+OBJ_DIR = build
+OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
 # Target executable
 TARGET = sniffer
 
 .PHONY: all clean
 
-all: $(TARGET)
+all: $(OBJ_DIR) $(TARGET)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(OBJ_DIR)/capture/pcapng
+	mkdir -p $(OBJ_DIR)/file/file_pcapng
 
 $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-%.o: %.c
+$(OBJ_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJ) $(TARGET)
+
