@@ -13,7 +13,13 @@ IDB *createIDB(uint16_t linkType)
         exit(EXIT_FAILURE);
     }
     newIDB->blockType = 0x00000001;                            // Block Type = 0x00000001 for IDB
-    newIDB->blockTotalLength = sizeof(IDB);                    // Total Length of the Block including the linkType field
+    // Calculate the total length of the block, including padding
+    uint32_t blockTotalLength = sizeof(IDB) + 2; // IDB structure size + linkType field size
+    // If the block total length is not a multiple of 4, add padding
+    if (blockTotalLength % 4 != 0) {
+        blockTotalLength += 4 - (blockTotalLength % 4);
+    }
+    newIDB->blockTotalLength = blockTotalLength;
     newIDB->linkType = linkType;
     return newIDB;
 }

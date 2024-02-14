@@ -27,9 +27,14 @@ PCAPNG *createPCAPNG()
         printf("Memory allocation failed\n");
         return NULL; // Exit with an error code
     }
-    char userappl[] = "inspireTCP 0.0.1";
-
-    getSystemInformation(hardware, os);
+    
+    char *userappl = (char *)calloc(256, sizeof(char)); // Assuming maximum length of application information
+    if (os == NULL)
+    {
+        printf("Memory allocation failed\n");
+        return NULL; // Exit with an error code
+    }
+    //getSystemInformation(hardware, os);
     // Get system information
     pcapng->shb = createSHB(hardware, os, userappl); // Create Section Header Block
     pcapng->idbList = NULL;                          // Initialize IDB linked list to empty
@@ -157,7 +162,6 @@ void getSystemInformation(char *hardware, char *os)
     strcpy(hardware, sys_info.machine);
     snprintf(os, sizeof(sys_info.sysname) + sizeof(sys_info.release) + 2, "%s %s", sys_info.sysname, sys_info.release);
 }
-
 // Function to print a Section Header Block (SHB) including options
 void printSHB(const SHB *shb) {
     printf("Section Header Block (SHB):\n");
@@ -177,7 +181,7 @@ void printSHB(const SHB *shb) {
             printf("%02X ", *optionsPtr++);
         }
         printf("(Size: %u bytes)\n", optionLength);
-        // Add padding bytes if necessary
+        // Skip over padding bytes
         size_t paddingBytes = (4 - (optionLength % 4)) % 4;
         optionsPtr += paddingBytes;
     }
@@ -204,7 +208,7 @@ void printIDB(const IDB *idb) {
             printf("%02X ", *optionsPtr++);
         }
         printf("(Size: %u bytes)\n", optionLength);
-        // Add padding bytes if necessary
+        // Skip over padding bytes
         size_t paddingBytes = (4 - (optionLength % 4)) % 4;
         optionsPtr += paddingBytes;
     }
@@ -235,7 +239,7 @@ void printEPB(const EPB *epb) {
             printf("%02X ", *optionsPtr++);
         }
         printf("(Size: %u bytes)\n", optionLength);
-        // Add padding bytes if necessary
+        // Skip over padding bytes
         size_t paddingBytes = (4 - (optionLength % 4)) % 4;
         optionsPtr += paddingBytes;
     }

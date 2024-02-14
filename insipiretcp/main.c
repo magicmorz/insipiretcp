@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
     enable_sudo_debugging();
 
     CommandLineOptions options;
-
     process_options(argc, argv, &options);
 
     if (options.fptr == NULL)

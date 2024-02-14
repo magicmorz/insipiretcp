@@ -199,7 +199,7 @@ int DoSniffing(int sockfd, int num_packets)
 
     printf("DONE PRINTING GARBAGE NOW PRINTING PCAPNG STRUCTURE\n");
     printPCAPNG(capture);
-    // Save the PCAPNG structure to a file (you need to implement this function)
+    // Save the PCAPNG structure to a file
     if (savePCAPNGToFile(capture, "output/captured_packets.pcapng") != 0)
     {
         fprintf(stderr, "Failed to save PCAPNG structure to file\n");
@@ -207,5 +207,6 @@ int DoSniffing(int sockfd, int num_packets)
         freePCAPNG(capture);
         return EXIT_FAILURE;
     }
+    freePCAPNG(capture);
     return EXIT_SUCCESS;
 }

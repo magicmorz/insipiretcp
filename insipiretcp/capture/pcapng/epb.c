@@ -24,7 +24,13 @@ EPB *createEPB(uint32_t interfaceID, uint32_t capturedPacketLength,
     newEPB->timestampLower = timestampMicroseconds & 0xFFFFFFFF;
 
     newEPB->blockType = 0x00000006;                            // Block Type = 0x00000006 for EPB
-    newEPB->blockTotalLength = sizeof(EPB) - sizeof(uint32_t); // Total Length of the Block excluding the blockTotalLength field itself
+    // Calculate the total length of the block, including padding
+    uint32_t blockTotalLength = sizeof(EPB) - sizeof(uint32_t) + capturedPacketLength; // EPB structure size - blockTotalLength field size + capturedPacketLength
+    // If the block total length is not a multiple of 4, add padding
+    if (blockTotalLength % 4 != 0) {
+        blockTotalLength += 4 - (blockTotalLength % 4);
+    }
+    newEPB->blockTotalLength = blockTotalLength;
     newEPB->interfaceID = interfaceID;
     newEPB->capturedPacketLength = capturedPacketLength;
     newEPB->originalPacketLength = originalPacketLength;
