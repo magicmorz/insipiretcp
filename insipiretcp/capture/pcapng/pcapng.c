@@ -29,7 +29,7 @@ PCAPNG *createPCAPNG()
     }
     
     char *userappl = (char *)calloc(256, sizeof(char)); // Assuming maximum length of application information
-    if (os == NULL)
+    if (userappl == NULL)
     {
         printf("Memory allocation failed\n");
         return NULL; // Exit with an error code
@@ -193,9 +193,7 @@ void printIDB(const IDB *idb) {
     printf("Interface Description Block (IDB):\n");
     printf("Block Type: 0x%08X (Size: %zu bytes)\n", idb->blockType, sizeof(idb->blockType));
     printf("Block Total Length: %u (Size: %zu bytes)\n", idb->blockTotalLength, sizeof(idb->blockTotalLength));
-    printf("Link Type ID: %u (Size: %zu bytes)\n", idb->linkType, sizeof(idb->linkType));
-    // Print more IDB fields as needed
-
+    
     // Print options
     const uint8_t *optionsPtr = (const uint8_t *)idb + sizeof(IDB);
     while (*optionsPtr != 0x00) {

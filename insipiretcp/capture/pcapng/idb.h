@@ -9,7 +9,8 @@ typedef struct IDB
     uint32_t blockType;        // Block Type = 0x00000001
     uint32_t blockTotalLength; // Total Length of the Block
     uint16_t linkType;         // Link Type
-    // Add more fields as needed
+    uint16_t reserved;         // reserved
+    uint32_t snapLength;       // Total Length of the Block
 } IDB;
 
 // Function to create a new IDB

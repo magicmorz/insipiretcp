@@ -101,7 +101,7 @@ int DoSniffing(int sockfd, int num_packets)
     }
 
     // Create an Interface Description Block (IDB) for the interface
-    IDB *idb = createIDB(LINKTYPE_ETHERNET);
+    IDB *idb = createIDB(LINKTYPE_ETHERNET); 
     if (idb == NULL)
     {
         fprintf(stderr, "Failed to create IDB\n");
