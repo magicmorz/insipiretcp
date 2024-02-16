@@ -23,17 +23,19 @@ EPB *createEPB(uint32_t interfaceID, uint32_t capturedPacketLength,
     newEPB->timestampUpper = timestampMicroseconds >> 32;
     newEPB->timestampLower = timestampMicroseconds & 0xFFFFFFFF;
 
-    newEPB->blockType = 0x00000006;                            // Block Type = 0x00000006 for EPB
+    newEPB->blockType = 0x00000006; // Block Type = 0x00000006 for EPB
     // Calculate the total length of the block, including padding
-    uint32_t blockTotalLength = sizeof(EPB) - sizeof(uint32_t) + capturedPacketLength; // EPB structure size - blockTotalLength field size + capturedPacketLength
+    uint32_t blockTotalLength = sizeof(EPB) + capturedPacketLength + 4;
     // If the block total length is not a multiple of 4, add padding
-    if (blockTotalLength % 4 != 0) {
+    if (blockTotalLength % 4 != 0)
+    {
         blockTotalLength += 4 - (blockTotalLength % 4);
     }
     newEPB->blockTotalLength = blockTotalLength;
     newEPB->interfaceID = interfaceID;
     newEPB->capturedPacketLength = capturedPacketLength;
     newEPB->originalPacketLength = originalPacketLength;
+
     newEPB->packetData = (uint8_t *)malloc(capturedPacketLength);
     if (newEPB->packetData == NULL)
     {
@@ -41,6 +43,11 @@ EPB *createEPB(uint32_t interfaceID, uint32_t capturedPacketLength,
         exit(EXIT_FAILURE);
     }
     memcpy(newEPB->packetData, packetData, capturedPacketLength); // Copy packet data
+
+    uint8_t *optionsPtr = (uint8_t *)newEPB + sizeof(EPB) + capturedPacketLength;
+
+    memset(optionsPtr, blockTotalLength, sizeof(blockTotalLength));
+
     return newEPB;
 }
 

@@ -14,22 +14,23 @@ int savePCAPNGToFile(PCAPNG *pcapng, const char *filename) {
     }
 
     // Write SHB to file
-    if (fwrite(pcapng->shb, 1, sizeof(SHB), file) != sizeof(SHB)) {
+    size_t elements_written = fwrite(pcapng->shb, sizeof(char), (pcapng->shb->blockTotalLength), file);
+    if (elements_written != (pcapng->shb->blockTotalLength)) {
         perror("Failed to write SHB to file");
         fclose(file);
         return -1;
     }
-
+    /*
     // Write IDBs to file
     IDB_Node *idbNode = pcapng->idbList;
     while (idbNode != NULL) {
-        if (fwrite(idbNode->idb, 1, sizeof(IDB), file) != sizeof(IDB)) {
+        if (fwrite(idbNode->idb, sizeof(char), sizeof(idbNode->idb->blockTotalLength), file) != sizeof(idbNode->idb->blockTotalLength)) {
             perror("Failed to write IDB to file");
             fclose(file);
             return -1;
         }
         idbNode = idbNode->next;
-    }
+    }*/
 
     // Write EPBs to file
     EPB_Node *epbNode = pcapng->epbList;

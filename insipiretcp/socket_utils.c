@@ -129,7 +129,7 @@ int DoSniffing(int sockfd, int num_packets)
             return EXIT_FAILURE;
         }
         // Create a new EPB for the captured packet
-        EPB *epb = createEPB(1, packet_length, packet_length, packet);
+        /*EPB *epb = createEPB(0, packet_length, packet_length, packet);
         if (epb == NULL)
         {
             fprintf(stderr, "Failed to create EPB for packet %d\n", i + 1);
@@ -139,7 +139,7 @@ int DoSniffing(int sockfd, int num_packets)
         }
 
         // Add the EPB to the PCAPNG structure
-        addEPBNode(capture, epb);
+        addEPBNode(capture, epb);*/
 
         printf("Packet %d:\n", i + 1);
 

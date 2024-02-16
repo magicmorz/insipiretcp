@@ -12,18 +12,18 @@ SHB *createSHB(const char *hardwareName, const char *osName, const char *userApp
 
     // Calculate option lengths
     uint32_t hardwareNameLength = strlen(hardwareName);
-    uint32_t hardwareNamePaddingLength = 4-((2 + 2 + hardwareNameLength) % 4);
+    uint32_t hardwareNamePaddingLength = 4 - ((2 + 2 + hardwareNameLength) % 4);
 
     uint32_t osNameLength = strlen(osName);
-    uint32_t osNamePaddingLength = 4-((2+2+osNameLength) % 4);
+    uint32_t osNamePaddingLength = 4 - ((2 + 2 + osNameLength) % 4);
 
     uint32_t userAppNameLength = strlen(userAppName);
-    uint32_t userAppNamePaddingLength = 4-((2+2+userAppNameLength) % 4);
+    uint32_t userAppNamePaddingLength = 4 - ((2 + 2 + userAppNameLength) % 4);
 
     // Calculate total length including options and padding
-    uint32_t totalOptionsLength = hardwareNameLength + hardwareNamePaddingLength + osNameLength + osNamePaddingLength + userAppNameLength + userAppNamePaddingLength;
+    uint32_t totalOptionsLength = hardwareNameLength + hardwareNamePaddingLength + osNameLength + osNamePaddingLength + userAppNameLength + userAppNamePaddingLength + 4 + 4 + 4;
 
-    uint32_t totalLength = sizeof(SHB) + totalOptionsLength + 4; // 4 bytes for options trailing block
+    uint32_t totalLength = sizeof(SHB) + totalOptionsLength + 4 +4; // 4 bytes for options trailing block
 
     // Allocate memory for SHB
     SHB *newSHB = (SHB *)malloc(totalLength);
@@ -79,6 +79,10 @@ SHB *createSHB(const char *hardwareName, const char *osName, const char *userApp
     optionsPtr += 2;
 
     *((uint16_t *)optionsPtr) = 0x0000; // Padding
+
+    // trailing block total length
+    optionsPtr += 2;
+    *((uint32_t *)optionsPtr) = newSHB->blockTotalLength;
 
     return newSHB;
 }
