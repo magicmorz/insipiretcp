@@ -20,17 +20,17 @@ int savePCAPNGToFile(PCAPNG *pcapng, const char *filename) {
         fclose(file);
         return -1;
     }
-    /*
+    
     // Write IDBs to file
     IDB_Node *idbNode = pcapng->idbList;
     while (idbNode != NULL) {
-        if (fwrite(idbNode->idb, sizeof(char), sizeof(idbNode->idb->blockTotalLength), file) != sizeof(idbNode->idb->blockTotalLength)) {
+        if (fwrite(idbNode->idb, sizeof(char), idbNode->idb->blockTotalLength, file) != idbNode->idb->blockTotalLength) {
             perror("Failed to write IDB to file");
             fclose(file);
             return -1;
         }
         idbNode = idbNode->next;
-    }*/
+    }
 
     // Write EPBs to file
     EPB_Node *epbNode = pcapng->epbList;

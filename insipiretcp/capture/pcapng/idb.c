@@ -23,15 +23,15 @@ IDB *createIDB(uint16_t linkType)
 
     uint32_t ifTsresolLength = sizeof(ifTsresol);
     uint32_t ifTsresolPaddingLength = 4 - ((2 + 2 + ifTsresolLength) % 4);
-
+/*
     uint32_t ifFilterLength = strlen(ifFilter);
     uint32_t ifFilterPaddingLength = 4 - ((2 + 2 + ifFilterLength) % 4);
-
+*/
     uint32_t ifOsLength = strlen(ifOs);
     uint32_t ifOsPaddingLength = 4 - ((2 + 2 + ifOsLength) % 4);
 
     // Calculate total length including options and padding
-    uint32_t totalOptionsLength = ifNameLength + 4 + ifNamePaddingLength + ifDescriptionLength + 4 + ifDescriptionPaddingLength + ifTsresolLength + 4 + ifTsresolPaddingLength + ifFilterLength + 4 + ifFilterPaddingLength + ifOsLength + 4 + ifOsPaddingLength + 2 + 2;
+    uint32_t totalOptionsLength = ifNameLength + 4 + ifNamePaddingLength + ifDescriptionLength + 4 + ifDescriptionPaddingLength + ifTsresolLength + 4 + ifTsresolPaddingLength + /*ifFilterLength + 4 + ifFilterPaddingLength +*/ ifOsLength + 4 + ifOsPaddingLength + 2 + 2;
 
     uint32_t blockTotalLength = sizeof(IDB) + totalOptionsLength + sizeof(uint32_t); // sizeof(uint32_t) for redundant block legth
 
@@ -78,7 +78,9 @@ IDB *createIDB(uint16_t linkType)
     optionsPtr += 2;
     memcpy(optionsPtr, &ifTsresol, sizeof(ifTsresol));
     optionsPtr += sizeof(ifTsresol);
-
+    memset(optionsPtr, 0x00, ifTsresolPaddingLength);
+    optionsPtr += ifTsresolPaddingLength;
+/*
     // interface filter
     *((uint32_t *)optionsPtr) = 0x000b; // Option Code for interface filter
     optionsPtr += 2;
@@ -88,7 +90,7 @@ IDB *createIDB(uint16_t linkType)
     optionsPtr += ifFilterLength;
     memset(optionsPtr, 0x00, ifFilterPaddingLength);
     optionsPtr += ifFilterPaddingLength;
-
+*/
     // interface os
     *((uint32_t *)optionsPtr) = 0x000c; // Option Code for interface os
     optionsPtr += 2;
@@ -105,9 +107,9 @@ IDB *createIDB(uint16_t linkType)
 
     *((uint16_t *)optionsPtr) = 0x0000; // Padding
 
+    // trailing block total length
     optionsPtr += 2;
-    memset(optionsPtr, blockTotalLength, sizeof(blockTotalLength));
-
+    *((uint32_t *)optionsPtr) = blockTotalLength;
     return newIDB;
 }
 
