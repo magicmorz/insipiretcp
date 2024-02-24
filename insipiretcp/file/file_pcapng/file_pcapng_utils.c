@@ -70,8 +70,6 @@ int savePCAPNGToFile(PCAPNG *pcapng, const char *filename)
             return -1;
         }
         free(buffer);
-        
-
 
         bufferSize = (sizeof(epbNode->epb->blockTotalLengthTrailing) * sizeof(char));
         buffer = (char *)malloc(bufferSize);
@@ -84,32 +82,6 @@ int savePCAPNGToFile(PCAPNG *pcapng, const char *filename)
             return -1;
         }
         free(buffer);
-
-        /*
-        // Write packetData separately
-        EPB *packetPtr = (EPB *)epbNode->epb;
-        for (size_t i = 0; i < (packetPtr->capturedPacketLength + sizeof(uint32_t)); i++)
-        {
-            fwrite((char*)packetPtr + sizeof(EPB) - sizeof(int32_t) + i, 1, 1, file);
-            printf("loop is %zu\n", i);
-        }
-        printf("size is %zu\n", packetPtr->capturedPacketLength+ sizeof(uint32_t));
-        */
-        /*
-        if (fwrite(packetPtr, sizeof(char), epbNode->epb->capturedPacketLength, file) != epbNode->epb->capturedPacketLength)
-        {
-            perror("Failed to write packetData to file");
-            fclose(file);
-            return -1;
-        }
-        // Write trailing block length separately
-        if (fwrite(&(epbNode->epb->blockTotalLengthTrailing), sizeof(char), sizeof(uint32_t), file) != sizeof(uint32_t))
-        {
-            perror("Failed to write blockTotalLengthTrailing to file");
-            fclose(file);
-            return -1;
-        }
-        */
         epbNode = epbNode->next;
     }
 
