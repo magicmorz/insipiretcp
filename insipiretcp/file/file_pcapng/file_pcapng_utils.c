@@ -60,15 +60,6 @@ int savePCAPNGToFile(PCAPNG *pcapng, const char *filename)
         bufferSize += paddingSize;
 
         buffer = (char *)calloc(sizeof(char),bufferSize);
-
-        printf("TEST TEST TEST %x\n", (uint8_t)*(currentEPB->packetData));
-       /* 
-        for (size_t i = 0; i < bufferSize; i++)
-        {
-            //*(buffer+i) = *(currentEPB->packetData+i);
-            *(buffer+i) = 1;
-        }
-        */
         
         memcpy(buffer, currentEPB->packetData, bufferSize);
         // Write packetData
@@ -82,7 +73,7 @@ int savePCAPNGToFile(PCAPNG *pcapng, const char *filename)
         
 
 
-        bufferSize = ((epbNode->epb->blockTotalLengthTrailing) * sizeof(char));
+        bufferSize = (sizeof(epbNode->epb->blockTotalLengthTrailing) * sizeof(char));
         buffer = (char *)malloc(bufferSize);
         memcpy(buffer, &(epbNode->epb->blockTotalLengthTrailing), bufferSize);
         // Write trailing block length
