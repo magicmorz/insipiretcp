@@ -9,44 +9,33 @@
 EPB *createEPB(uint32_t interfaceID, uint32_t capturedPacketLength,
                uint32_t originalPacketLength, uint8_t *packetData)
 {
-    EPB *newEPB = (EPB *)malloc(sizeof(EPB));
+    uint32_t blockTotalLength = sizeof(EPB)+ capturedPacketLength + (4 - (capturedPacketLength % 4)-sizeof(uint8_t*));
+    EPB *newEPB = (EPB *)malloc(blockTotalLength);
     if (newEPB == NULL)
     {
         perror("Memory allocation failed");
         exit(EXIT_FAILURE);
     }
+    newEPB->blockType = 0x00000006; // EPB
+    newEPB->blockTotalLength = blockTotalLength;
+    newEPB->interfaceID = interfaceID;
 
-    // Get current timestamp in microseconds
     uint64_t timestampMicroseconds = getCurrentTimestampMicroseconds();
 
     // Split the timestamp into upper and lower parts (nanoseconds resolution)
     newEPB->timestampUpper = timestampMicroseconds >> 32;
     newEPB->timestampLower = timestampMicroseconds & 0xFFFFFFFF;
 
-    newEPB->blockType = 0x00000006; // Block Type = 0x00000006 for EPB
-    // Calculate the total length of the block, including padding
-    uint32_t blockTotalLength = sizeof(EPB) + capturedPacketLength + 4;
-    // If the block total length is not a multiple of 4, add padding
-    if (blockTotalLength % 4 != 0)
-    {
-        blockTotalLength += 4 - (blockTotalLength % 4);
-    }
-    newEPB->blockTotalLength = blockTotalLength;
-    newEPB->interfaceID = interfaceID;
     newEPB->capturedPacketLength = capturedPacketLength;
     newEPB->originalPacketLength = originalPacketLength;
-
-    newEPB->packetData = (uint8_t *)malloc(capturedPacketLength);
+    newEPB->packetData = (uint8_t *)calloc(capturedPacketLength + (4 - (capturedPacketLength % 4)), sizeof(uint8_t));
     if (newEPB->packetData == NULL)
     {
         perror("Memory allocation failed");
         exit(EXIT_FAILURE);
     }
-    memcpy(newEPB->packetData, packetData, capturedPacketLength); // Copy packet data
-
-    uint8_t *optionsPtr = (uint8_t *)newEPB + sizeof(EPB) + capturedPacketLength;
-
-    memset(optionsPtr, blockTotalLength, sizeof(blockTotalLength));
+    memcpy(newEPB->packetData, packetData, capturedPacketLength);
+    newEPB->blockTotalLengthTrailing = blockTotalLength;
 
     return newEPB;
 }

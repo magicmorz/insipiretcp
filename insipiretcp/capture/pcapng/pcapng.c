@@ -49,7 +49,7 @@ void freePCAPNG(PCAPNG *pcapng)
     {
         freeSHB(pcapng->shb);             // Free Section Header Block
         freeIDBNodeList(pcapng->idbList); // Free IDB linked list
-        freeEPBNodeList(pcapng->epbList); // Free EPB linked list
+        //freeEPBNodeList(pcapng->epbList); // Free EPB linked list
         free(pcapng);
     }
 }
@@ -256,10 +256,10 @@ void printPCAPNG(const PCAPNG *pcapng) {
         idbNode = idbNode->next;
     }
 
-    // Print EPB list
+    /*/ Print EPB list
     EPB_Node *epbNode = pcapng->epbList;
     while (epbNode != NULL) {
         printEPB(epbNode->epb);
         epbNode = epbNode->next;
-    }
+    }*/
 }

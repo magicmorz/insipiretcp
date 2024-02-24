@@ -101,7 +101,7 @@ int DoSniffing(int sockfd, int num_packets)
     }
 
     // Create an Interface Description Block (IDB) for the interface
-    IDB *idb = createIDB(LINKTYPE_ETHERNET); 
+    IDB *idb = createIDB(LINKTYPE_ETHERNET);
     if (idb == NULL)
     {
         fprintf(stderr, "Failed to create IDB\n");
@@ -129,7 +129,7 @@ int DoSniffing(int sockfd, int num_packets)
             return EXIT_FAILURE;
         }
         // Create a new EPB for the captured packet
-        /*EPB *epb = createEPB(0, packet_length, packet_length, packet);
+        EPB *epb = createEPB(0, packet_length, packet_length, packet);
         if (epb == NULL)
         {
             fprintf(stderr, "Failed to create EPB for packet %d\n", i + 1);
@@ -139,7 +139,7 @@ int DoSniffing(int sockfd, int num_packets)
         }
 
         // Add the EPB to the PCAPNG structure
-        addEPBNode(capture, epb);*/
+        addEPBNode(capture, epb);
 
         printf("Packet %d:\n", i + 1);
 
@@ -200,7 +200,7 @@ int DoSniffing(int sockfd, int num_packets)
     printf("DONE PRINTING GARBAGE NOW PRINTING PCAPNG STRUCTURE\n");
     printPCAPNG(capture);
     // Save the PCAPNG structure to a file
-    if (savePCAPNGToFile(capture, "output/captured_packets.pcapng") != 0)
+    if (savePCAPNGToFile(capture, "/home/mish/c_stuff/insipiretcp/insipiretcp/output/captured_packets.pcapng") != 0)
     {
         fprintf(stderr, "Failed to save PCAPNG structure to file\n");
         // Free memory allocated for the PCAPNG structure

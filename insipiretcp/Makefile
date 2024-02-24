@@ -17,14 +17,14 @@ OBJ_DIR = build
 OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
 # Target executable
-TARGET = sniffer
+TARGET_DIR = .
+TARGET = $(TARGET_DIR)/sniffer
 
 .PHONY: all clean
 
 all: $(OBJ_DIR) $(TARGET)
 
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)/capture/pcapng
 	mkdir -p $(OBJ_DIR)/file/file_pcapng
 
@@ -35,5 +35,4 @@ $(OBJ_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
-
+	rm -rf $(OBJ_DIR) $(TARGET)
