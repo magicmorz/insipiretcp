@@ -138,6 +138,7 @@ int DoSniffing(int sockfd, int num_packets)
             return EXIT_FAILURE;
         }
 
+        capture = (PCAPNG*)realloc(capture, sizeof(capture)+epb->capturedPacketLength);
         // Add the EPB to the PCAPNG structure
         addEPBNode(capture, epb);
 

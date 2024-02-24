@@ -49,8 +49,7 @@ void freePCAPNG(PCAPNG *pcapng)
     {
         freeSHB(pcapng->shb);             // Free Section Header Block
         freeIDBNodeList(pcapng->idbList); // Free IDB linked list
-        // TODO FIX SEGFAULT
-        //freeEPBNodeList(pcapng->epbList); // Free EPB linked list SEGFAULT!!!
+        freeEPBNodeList(pcapng->epbList); // Free EPB linked list SEGFAULT!!!
         free(pcapng);
     }
 }
