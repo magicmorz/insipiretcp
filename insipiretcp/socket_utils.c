@@ -138,7 +138,7 @@ int DoSniffing(int sockfd, int num_packets)
             return EXIT_FAILURE;
         }
 
-        capture = (PCAPNG*)realloc(capture, sizeof(capture)+epb->capturedPacketLength);
+        capture = (PCAPNG*)realloc(capture, sizeof(capture)+sizeof(EPB_Node)+(epb->capturedPacketLength)+ calculatePaddingFor32bit(epb->capturedPacketLength));
         // Add the EPB to the PCAPNG structure
         addEPBNode(capture, epb);
 
@@ -146,7 +146,8 @@ int DoSniffing(int sockfd, int num_packets)
 
         // Print the packet in hexadecimal form
         PrintPacketInHex(packet, packet_length);
-
+       
+        
         PacketMetadata packet_metadata = {0, 0, 0, 0, 0, 0, 0};
         ParseLayer2(packet, packet_length, &packet_metadata);
         ParseLayer3(packet, packet_length, &packet_metadata);
@@ -167,7 +168,6 @@ int DoSniffing(int sockfd, int num_packets)
 
         else if (packet_metadata.layer4_protocol_id == IPPROTO_TCP)
         {
-
             if (!ParseData(packet, packet_length))
             {
                 printf("------------ END OF PACKET, IP & TCP & NO DATA ------------\n");
@@ -199,7 +199,7 @@ int DoSniffing(int sockfd, int num_packets)
     }
 
     printf("DONE PRINTING GARBAGE NOW PRINTING PCAPNG STRUCTURE\n");
-    printPCAPNG(capture);
+    //printPCAPNG(capture);
     // Save the PCAPNG structure to a file
     if (savePCAPNGToFile(capture, "/home/mish/c_stuff/insipiretcp/insipiretcp/output/captured_packets.pcapng") != 0)
     {

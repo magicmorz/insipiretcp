@@ -54,6 +54,29 @@ void freePCAPNG(PCAPNG *pcapng)
     }
 }
 
+size_t calculatePCAPNGSize(const PCAPNG *pcapng) {
+    size_t size = 0;
+
+    // Add size of Section Header Block
+    size += sizeof(SHB);
+
+    // Add size of Interface Description Blocks (IDBs) and their options
+    IDB_Node *idbNode = pcapng->idbList;
+    while (idbNode != NULL) {
+        size += idbNode->idb->blockTotalLength;
+        idbNode = idbNode->next;
+    }
+
+    // Add size of Enhanced Packet Blocks (EPBs) and their options
+    EPB_Node *epbNode = pcapng->epbList;
+    while (epbNode != NULL) {
+        size += epbNode->epb->blockTotalLength;
+        epbNode = epbNode->next;
+    }
+
+    return size;
+}
+
 // Function to create a new IDB node
 IDB_Node *createIDBNode(IDB *idb)
 {
@@ -262,4 +285,14 @@ void printPCAPNG(const PCAPNG *pcapng) {
         printEPB(epbNode->epb);
         epbNode = epbNode->next;
     }*/
+}
+
+// Function to calculate padding required for a valid 32 bit frame
+size_t calculatePaddingFor32bit(size_t packet_length) {
+    // EPB structure requires the length of the packet to be aligned to 32 bits (4 bytes)
+    size_t remainder = packet_length % 4;
+    if (remainder == 0)
+        return 0; // No padding required
+    else
+        return 4 - remainder; // Calculate padding required
 }

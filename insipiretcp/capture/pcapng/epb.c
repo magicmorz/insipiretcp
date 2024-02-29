@@ -4,12 +4,14 @@
 #include <stdint.h> // For fixed-width integer types
 #include "epb.h"
 #include <sys/time.h> // For gettimeofday function
+#include "pcapng.h"
+
 
 // Function to create a new EPB
 EPB *createEPB(uint32_t interfaceID, uint32_t capturedPacketLength,
                uint32_t originalPacketLength, uint8_t *packetData)
 {
-    uint32_t blockTotalLength = sizeof(EPB)+ capturedPacketLength + (4 - (capturedPacketLength % 4)-sizeof(uint8_t*));
+    uint32_t blockTotalLength = sizeof(EPB)+ capturedPacketLength + calculatePaddingFor32bit(capturedPacketLength)-sizeof(uint8_t*);
     EPB *newEPB = (EPB *)malloc(blockTotalLength);
     if (newEPB == NULL)
     {
@@ -28,7 +30,7 @@ EPB *createEPB(uint32_t interfaceID, uint32_t capturedPacketLength,
 
     newEPB->capturedPacketLength = capturedPacketLength;
     newEPB->originalPacketLength = originalPacketLength;
-    newEPB->packetData = (uint8_t *)calloc(capturedPacketLength + (4 - (capturedPacketLength % 4)), sizeof(uint8_t));
+    newEPB->packetData = (uint8_t *)calloc(capturedPacketLength + calculatePaddingFor32bit(capturedPacketLength), sizeof(uint8_t));
     if (newEPB->packetData == NULL)
     {
         perror("Memory allocation failed");

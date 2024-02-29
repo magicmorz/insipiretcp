@@ -29,6 +29,7 @@ typedef struct PCAPNG
 // Function prototypes
 PCAPNG *createPCAPNG();
 void freePCAPNG(PCAPNG *pcapng);
+size_t calculatePCAPNGSize(const PCAPNG *pcapng);
 IDB_Node *createIDBNode(IDB *idb);
 void addIDBNode(PCAPNG *pcapng, IDB *idb);
 void freeIDBNodeList(IDB_Node *idbList);
@@ -37,4 +38,5 @@ void addEPBNode(PCAPNG *pcapng, EPB *epb);
 void freeEPBNodeList(EPB_Node *epbList);
 void getSystemInformation(char *hardware, char *os);
 void printPCAPNG(const PCAPNG *pcapng);
+size_t calculatePaddingFor32bit(size_t packet_length);
 #endif /* PCAPNG_H */
