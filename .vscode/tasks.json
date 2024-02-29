@@ -13,6 +13,11 @@
               "${workspaceFolder}/insipiretcp/protocol_support.c",
               "${workspaceFolder}/insipiretcp/cli_utils.c",
               "${workspaceFolder}/insipiretcp/main.c",
+              "${workspaceFolder}/insipiretcp/capture/pcapng/epb.c",
+              "${workspaceFolder}/insipiretcp/capture/pcapng/idb.c",
+              "${workspaceFolder}/insipiretcp/capture/pcapng/pcapng.c",
+              "${workspaceFolder}/insipiretcp/capture/pcapng/shb.c",
+              "${workspaceFolder}/insipiretcp/file/file_pcapng/file_pcapng_utils.c",
               "-o",
               "${workspaceFolder}/insipiretcp/${fileBasenameNoExtension}"
           ],

@@ -1,5 +1,5 @@
 sniffer
 *.o
 settings.json
-insipiretcp/.vscode/launch.json
-insipiretcp/.vscode/tasks.json
+insipiretcp/insipiretcp/output/*.pcapng
+
