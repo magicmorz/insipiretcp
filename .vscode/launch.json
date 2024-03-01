@@ -20,25 +20,6 @@
       "miDebuggerPath": "${workspaceFolder}/gdb_root.sh",
       "preLaunchTask": "Build Sniffer",
       "postDebugTask": "clean"
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": false,
-      "cwd": "/home/mish/c_stuff/insipiretcp",
-      "program": "/home/mish/c_stuff/insipiretcp/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
     }
   ]
 }

@@ -2,4 +2,5 @@ sniffer
 *.o
 settings.json
 insipiretcp/insipiretcp/output/*.pcapng
-
+tasks
+launch
