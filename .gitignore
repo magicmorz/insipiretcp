@@ -1,6 +1,6 @@
 sniffer
 *.o
 settings.json
-insipiretcp/insipiretcp/output/*.pcapng
+output/*.pcapng
 tasks
 launch
