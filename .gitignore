@@ -2,5 +2,6 @@ sniffer
 *.o
 settings.json
 output/*.pcapng
+output/
 tasks
 launch
